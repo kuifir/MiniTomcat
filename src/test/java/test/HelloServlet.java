@@ -1,15 +1,11 @@
 package test;
 
-import server.Request;
-import server.Response;
-import server.Servlet;
-
+import javax.servlet.*;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 public class HelloServlet implements Servlet {
     @Override
-    public void service(Request req, Response res) throws IOException {
+    public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
         String doc = """
                 <!DOCTYPE html>
                 <html>
@@ -17,6 +13,27 @@ public class HelloServlet implements Servlet {
                 <body bgcolor="#f0f0f0">
                 <h1 align="center">Hello World 你好</h1>
                 """;
-        res.getOutput().write(doc.getBytes(StandardCharsets.UTF_8));
+        res.getWriter().println(doc);
+    }
+
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+
+    }
+
+    @Override
+    public ServletConfig getServletConfig() {
+        return null;
+    }
+
+
+    @Override
+    public String getServletInfo() {
+        return null;
+    }
+
+    @Override
+    public void destroy() {
+
     }
 }

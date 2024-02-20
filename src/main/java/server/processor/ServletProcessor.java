@@ -4,16 +4,16 @@ import org.apache.commons.lang3.text.StrSubstitutor;
 import server.HttpServer;
 import server.Request;
 import server.Response;
-import server.Servlet;
 
+import javax.servlet.Servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLStreamHandler;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,16 +35,23 @@ public class ServletProcessor {
         String uri = request.getUri();
         String serverName = uri.substring(uri.lastIndexOf("/") + 1);
         URLClassLoader loader = null;
-        OutputStream output = null;
+        PrintWriter writer = null;
         try {
             // create a URLClassLoader
             URL[] urls = new URL[1];
             URLStreamHandler streamHandler = null;
             File classpath = new File(HttpServer.WEB_ROOT);
-            urls[0] =Paths.get(classpath.getCanonicalPath() + File.separator).toUri().toURL();
+            urls[0] = Paths.get(classpath.getCanonicalPath() + File.separator).toUri().toURL();
             loader = new URLClassLoader(urls);
         } catch (IOException e) {
             System.out.println(e.getMessage());
+        }
+        //获取PrintWriter
+        try {
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            writer = response.getWriter();
+        } catch (IOException e1) {
+            e1.printStackTrace();
         }
         //由上面的URLClassLoader加载这个servlet
         Class<?> servletClass = null;
@@ -54,13 +61,9 @@ public class ServletProcessor {
             System.out.println(e.getMessage());
         }
         // 写响应头
-        output = response.getOutput();
         String head = composeResponseHead();
-        try {
-            output.write(head.getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        writer.println(head);
+
         //创建servlet新实例，然后调用service()，由它来写动态内容到响应体
         Servlet servlet = null;
         try {
@@ -69,11 +72,7 @@ public class ServletProcessor {
         } catch (Throwable e) {
             System.out.println(e.getMessage());
         }
-        try {
-            output.flush();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+
     }
 
     //拼响应头，填充变量值
@@ -81,7 +80,7 @@ public class ServletProcessor {
         Map<String, Object> valuesMap = new HashMap<>();
         valuesMap.put("StatusCode", "200");
         valuesMap.put("StatusName", "OK");
-        valuesMap.put("ContentType", "text/html;charset=uft-8");
+        valuesMap.put("ContentType", "text/html;charset=UFT-8");
         valuesMap.put("ZonedDateTime", DateTimeFormatter.ISO_ZONED_DATE_TIME.format(ZonedDateTime.now()));
         StrSubstitutor sub = new StrSubstitutor(valuesMap);
         String responseHead = sub.replace(OKMessage);
