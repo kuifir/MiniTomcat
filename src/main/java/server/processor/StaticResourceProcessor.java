@@ -1,8 +1,8 @@
 package server.processor;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
+import server.HttpRequest;
 import server.HttpServer;
-import server.Request;
 import server.Response;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class StaticResourceProcessor {
                          
             """;
 
-    public void process(Request request, Response response) throws IOException {
+    public void process(HttpRequest request, Response response) throws IOException {
         byte[] bytes = new byte[BUFFER_SIZE];
         FileInputStream fis = null;
         OutputStream output = null;

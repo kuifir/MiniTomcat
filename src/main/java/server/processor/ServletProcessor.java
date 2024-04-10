@@ -1,14 +1,13 @@
 package server.processor;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
+import server.HttpRequest;
 import server.HttpServer;
-import server.Request;
 import server.Response;
 
 import javax.servlet.Servlet;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -30,7 +29,7 @@ public class ServletProcessor {
                         
             """;
 
-    public void process(Request request, Response response) {
+    public void process(HttpRequest request, Response response) {
         // 首先根据uri最后一个/号来定位，后面的字符串认为是servlet名字
         String uri = request.getUri();
         String serverName = uri.substring(uri.lastIndexOf("/") + 1);
