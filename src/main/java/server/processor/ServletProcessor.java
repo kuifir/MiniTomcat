@@ -1,9 +1,7 @@
 package server.processor;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
-import server.HttpRequest;
-import server.HttpServer;
-import server.Response;
+import server.*;
 
 import javax.servlet.Servlet;
 import java.io.File;
@@ -29,7 +27,7 @@ public class ServletProcessor {
                         
             """;
 
-    public void process(HttpRequest request, Response response) {
+    public void process(HttpRequest request, HttpResponse response) {
         // 首先根据uri最后一个/号来定位，后面的字符串认为是servlet名字
         String uri = request.getUri();
         String serverName = uri.substring(uri.lastIndexOf("/") + 1);
@@ -39,19 +37,15 @@ public class ServletProcessor {
             // create a URLClassLoader
             URL[] urls = new URL[1];
             URLStreamHandler streamHandler = null;
+            //这个URLClassloader的工作目录设置在HttpServer.WEB_ROOT
             File classpath = new File(HttpServer.WEB_ROOT);
             urls[0] = Paths.get(classpath.getCanonicalPath() + File.separator).toUri().toURL();
             loader = new URLClassLoader(urls);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        //获取PrintWriter
-        try {
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            writer = response.getWriter();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
+        //response默认为UTF-8编码
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         //由上面的URLClassLoader加载这个servlet
         Class<?> servletClass = null;
         try {
@@ -59,15 +53,20 @@ public class ServletProcessor {
         } catch (ClassNotFoundException e) {
             System.out.println(e.getMessage());
         }
-        // 写响应头
-        String head = composeResponseHead();
-        writer.println(head);
+        //回写头信息
+        try {
+            response.sendHeaders();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
 
         //创建servlet新实例，然后调用service()，由它来写动态内容到响应体
         Servlet servlet = null;
         try {
             servlet = (Servlet) servletClass.newInstance();
-            servlet.service(request, response);
+            HttpRequestFacade requestFacade = new HttpRequestFacade(request);
+            HttpResponseFacade responseFacade = new HttpResponseFacade(response);
+            servlet.service(requestFacade, responseFacade);
         } catch (Throwable e) {
             System.out.println(e.getMessage());
         }

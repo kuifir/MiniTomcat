@@ -87,9 +87,8 @@ public class HttpProcessor implements Runnable {
             HttpRequest request = new HttpRequest(input);
             request.parse(socket);
             // create Response object
-            Response response = new Response(output);
+            HttpResponse response = new HttpResponse(output);
             response.setRequest(request);
-
             // check if this is a request for a servlet or a static resource
             // a request for a servlet begins with "/servlet/"
             if (request.getUri().startsWith("/servlet/")) {

@@ -2,13 +2,14 @@ package server.processor;
 
 import org.apache.commons.lang3.text.StrSubstitutor;
 import server.HttpRequest;
+import server.HttpResponse;
 import server.HttpServer;
-import server.Response;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public class StaticResourceProcessor {
                          
             """;
 
-    public void process(HttpRequest request, Response response) throws IOException {
+    public void process(HttpRequest request, HttpResponse response) throws IOException {
         byte[] bytes = new byte[BUFFER_SIZE];
         FileInputStream fis = null;
         OutputStream output = null;
@@ -44,8 +45,10 @@ public class StaticResourceProcessor {
             File file = new File(HttpServer.WEB_ROOT, request.getUri());
             if (file.exists()) {
                 // 拼响应头
-                String head = composeResponseHead(file);
-                output.write(head.getBytes("utf-8"));
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                response.sendHeaders();
+//                String head = composeResponseHead(file);
+//                output.write(head.getBytes(StandardCharsets.UTF_8));
                 //读取文件内容，写入输出流
                 fis = new FileInputStream(file);
                 int ch = fis.read(bytes, 0, BUFFER_SIZE);
