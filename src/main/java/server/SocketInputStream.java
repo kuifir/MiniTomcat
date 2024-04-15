@@ -1,9 +1,11 @@
 package server;
 
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class SocketInputStream extends InputStream {
+public class SocketInputStream extends ServletInputStream {
     private static final byte CR = (byte) '\r';
     private static final byte LF = (byte) '\n';
     private static final byte SP = (byte) ' ';
@@ -20,15 +22,15 @@ public class SocketInputStream extends InputStream {
         buf = new byte[bufferSize];
     }
 
-    //从输入流中解析出request line
-    public void readRequestLine(HttpRequestLine requestLine)
-            throws IOException {
+    // 从输入流中解析出request line
+    // 按照格式解析请求行
+    public void readRequestLine(HttpRequestLine requestLine) throws IOException {
         int chr = 0;
         //跳过空行
         do {
             try {
                 chr = read();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         } while ((chr == CR) || (chr == LF));
         //第一个非空位置
@@ -104,8 +106,8 @@ public class SocketInputStream extends InputStream {
         requestLine.protocolEnd = readCount;
     }
 
-    public void readHeader(HttpHeader header)
-            throws IOException {
+    //读头信息，格式是header name:value
+    public void readHeader(HttpHeader header) throws IOException {
         int chr = read();
         if ((chr == CR) || (chr == LF)) { // Skipping CR
             if (chr == CR)
@@ -150,6 +152,7 @@ public class SocketInputStream extends InputStream {
         int crPos = -2;
         boolean eol = false;
         boolean validLine = true;
+        //处理行，因为一个header的值有可能多行(一行的前面是空格或者制表符)，需要连续处理
         while (validLine) {
             boolean space = true;
             // 跳过空格
@@ -191,6 +194,7 @@ public class SocketInputStream extends InputStream {
                 }
                 pos++;
             }
+            //再往前读一个字符，如果是空格或制表符号则继续，多行处理的情况
             int nextChr = read();
             if ((nextChr != SP) && (nextChr != HT)) {
                 pos--;
@@ -235,5 +239,20 @@ public class SocketInputStream extends InputStream {
         if (nRead > 0) {
             count = nRead;
         }
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
+
+    @Override
+    public boolean isReady() {
+        return false;
+    }
+
+    @Override
+    public void setReadListener(ReadListener readListener) {
+
     }
 }

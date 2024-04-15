@@ -71,13 +71,13 @@ public class HttpProcessor implements Runnable {
     }
 
     public void process(Socket socket) {
-        try {
-            Thread.sleep(3000);
-            System.out.println(System.currentTimeMillis());
-            System.out.println(Thread.currentThread().getName());
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        }
+//        try {
+//            Thread.sleep(3000);
+//            System.out.println(System.currentTimeMillis());
+//            System.out.println(Thread.currentThread().getName());
+//        } catch (InterruptedException e1) {
+//            e1.printStackTrace();
+//        }
         InputStream input;
         OutputStream output;
         try {
@@ -86,6 +86,11 @@ public class HttpProcessor implements Runnable {
             // create Request object and parse
             HttpRequest request = new HttpRequest(input);
             request.parse(socket);
+
+            //handle session
+            if (request.getSessionId() == null || request.getSessionId().isEmpty()) {
+                request.getSession(true);
+            }
             // create Response object
             HttpResponse response = new HttpResponse(output);
             response.setRequest(request);
