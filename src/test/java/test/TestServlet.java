@@ -28,9 +28,10 @@ public class TestServlet extends HttpServlet {
                 <html>
                 <head><meta charset="utf-8"><title>Test</title></head>
                 <body bgcolor="#f0f0f0">
-                <h1 align="center">Test 你好</h1>
+                <h1 align="center">Test Cookie And Session</h1>
                 """;
         System.out.println(doc);
+        response.getWriter().println(Integer.toHexString(doc.length()));
         response.getWriter().println(doc);
     }
 
@@ -49,9 +50,10 @@ public class TestServlet extends HttpServlet {
                 <html>
                 <head><meta charset="utf-8"><title>Test</title></head>
                 <body bgcolor="#f0f0f0">
-                <h1 align="center">Test 你好</h1>
+                <h1 align="center">Cookie And Session</h1>
                 """;
         System.out.println(doc);
+        response.getWriter().println(Integer.toHexString(doc.length()));
         response.getWriter().println(doc);
     }
 }

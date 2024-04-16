@@ -11,8 +11,10 @@ public class HelloServlet implements Servlet {
                 <html>
                 <head><meta charset="utf-8"><title>Test</title></head>
                 <body bgcolor="#f0f0f0">
-                <h1 align="center">Hello World 你好</h1>
+                <h1 align="center">Hello World</h1>
                 """;
+        String s = new String(doc.getBytes(res.getCharacterEncoding()), res.getCharacterEncoding());
+        res.getWriter().println(Integer.toHexString(s.length()));
         res.getWriter().println(doc);
     }
 

@@ -53,12 +53,24 @@ public class StaticResourceProcessor {
                 fis = new FileInputStream(file);
                 int ch = fis.read(bytes, 0, BUFFER_SIZE);
                 while (ch != -1) {
+                    output.write(Integer.toHexString(ch).getBytes());
+                    output.write("\r\n".getBytes());
                     output.write(bytes, 0, ch);
+                    output.write("\r\n".getBytes());
+                    output.write(Integer.toHexString(0).getBytes());
+                    output.write("\r\n".getBytes());
+                    output.write("\r\n".getBytes());
                     ch = fis.read(bytes, 0, BUFFER_SIZE);
                 }
                 output.flush();
             } else {
+                output.write(Integer.toHexString(fileNotFoundMessage.length()).getBytes());
+                output.write("\r\n".getBytes());
                 output.write(fileNotFoundMessage.getBytes());
+                output.write("\r\n".getBytes());
+                output.write(Integer.toHexString(0).getBytes());
+                output.write("\r\n".getBytes());
+                output.write("\r\n".getBytes());
             }
         } catch (Exception e) {
             System.out.printf(e.getMessage());

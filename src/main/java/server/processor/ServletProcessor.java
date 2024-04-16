@@ -50,6 +50,9 @@ public class ServletProcessor {
             HttpResponseFacade responseFacade = new HttpResponseFacade(response);
             System.out.println("Call Service()");
             servlet.service(requestFacade, responseFacade);
+            responseFacade.getWriter().println(Integer.toHexString(0));
+            responseFacade.getWriter().println();
+            responseFacade.getWriter().close();
         } catch (Throwable e) {
             System.out.println(e.getMessage());
         }

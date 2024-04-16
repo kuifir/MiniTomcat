@@ -89,12 +89,14 @@ public class HttpResponse implements HttpServletResponse {
             outputWriter.print(message);
         }
         outputWriter.print("\r\n");
+        setContentType("text/html; charset=UTF-8");
         if (getContentType() != null) {
             outputWriter.print("Content-Type: " + getContentType() + "\r\n");
         }
-        if (getContentLength() >= 0) {
-            outputWriter.print("Content-Length: " + getContentLength() + "\r\n");
-        }
+//        if (getContentLength() >= 0) {
+//            outputWriter.print("Content-Length: " + getContentLength() + "\r\n");
+//        }
+        outputWriter.print("Transfer-Encoding: " + "chunked" + "\r\n");
         //输出头信息
         Iterator<String> names = headers.keySet().iterator();
         while (names.hasNext()) {
