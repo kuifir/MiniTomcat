@@ -18,7 +18,7 @@ public class HttpResponse implements HttpServletResponse {
     String contentType = null;
     long contentLength = -1;
     String charset = null;
-    String characterEncoding = null;
+    String characterEncoding = "UTF-8";
     String protocol = "HTTP/1.1";
     //headers是一个保存头信息的map
     Map<String, String> headers = new ConcurrentHashMap<>();
@@ -29,6 +29,15 @@ public class HttpResponse implements HttpServletResponse {
 
     public HttpResponse(OutputStream output) {
         this.output = output;
+    }
+
+    //提供这个方法完成输出
+    public void finishResponse() {
+        try {
+            this.getWriter().flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setRequest(HttpRequest request) {

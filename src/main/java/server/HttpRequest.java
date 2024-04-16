@@ -29,10 +29,22 @@ public class HttpRequest implements HttpServletRequest {
     HttpSession session;
     String sessionid;
     SessionFacade sessionFacade;
+    private HttpResponse response;
 
+    public HttpRequest() {
+    }
     public HttpRequest(InputStream input) {
         this.input = input;
         this.sis = new SocketInputStream(this.input, 2048);
+    }
+
+    public void setStream(InputStream input) {
+        this.input = input;
+        this.sis = new SocketInputStream(this.input, 2048);
+    }
+
+    public void setResponse(HttpResponse response) {
+        this.response = response;
     }
 
     public void parse(Socket socket) {
@@ -99,7 +111,6 @@ public class HttpRequest implements HttpServletRequest {
                 case DefaultHeaders.CONTENT_LENGTH_NAME -> headers.put(name, value);
                 case DefaultHeaders.CONTENT_TYPE_NAME -> headers.put(name, value);
                 case DefaultHeaders.HOST_NAME -> headers.put(name, value);
-                case DefaultHeaders.CONNECTION_NAME -> headers.put(name, value);
                 case DefaultHeaders.TRANSFER_ENCODING_NAME -> headers.put(name, value);
                 case DefaultHeaders.COOKIE_NAME -> {
                     headers.put(name, value);
@@ -109,6 +120,12 @@ public class HttpRequest implements HttpServletRequest {
                         if (cookie.getName().equals("jsessionid")) {
                             this.sessionid = cookie.getValue();
                         }
+                    }
+                }
+                case DefaultHeaders.CONNECTION_NAME -> {
+                    headers.put(name, value);
+                    if (value.equals("close")) {
+                        response.setHeader("Connection", "close");
                     }
                 }
                 default -> headers.put(name, value);
@@ -383,7 +400,11 @@ public class HttpRequest implements HttpServletRequest {
             return sessionFacade;
         }
     }
-    public String getSessionId() { return this.sessionid; }
+
+    public String getSessionId() {
+        return this.sessionid;
+    }
+
     @Override
     public HttpSession getSession() {
         return this.sessionFacade;

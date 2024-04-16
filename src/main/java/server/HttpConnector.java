@@ -1,10 +1,10 @@
 package server;
 
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
+import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -19,6 +19,8 @@ public class HttpConnector implements Runnable {
     final Deque<HttpProcessor> processors = new ArrayDeque<>();
     //sessions map存放session
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
+    //一个全局的class loader
+    public static URLClassLoader loader = null;
 
     //创建新的session
     public static Session createSession() {
@@ -52,13 +54,27 @@ public class HttpConnector implements Runnable {
 
     @Override
     public void run() {
-        ServerSocket serverSocket;
+        ServerSocket serverSocket = null;
         int port = 8080;
         try {
             serverSocket = new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            System.exit(1);
         }
+        try {
+            // create a URLClassLoader
+            URL[] urls = new URL[1];
+            URLStreamHandler streamHandler = null;
+            //这个URLClassloader的工作目录设置在HttpServer.WEB_ROOT
+            File classpath = new File(HttpServer.WEB_ROOT);
+            urls[0] = Paths.get(classpath.getCanonicalPath() + File.separator).toUri().toURL();
+            loader = new URLClassLoader(urls);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+        // initialize processors pool
         for (int i = 0; i < minProcessors; i++) {
             HttpProcessor initProcessor = new HttpProcessor(this);
             initProcessor.start();

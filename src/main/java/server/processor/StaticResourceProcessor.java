@@ -46,7 +46,7 @@ public class StaticResourceProcessor {
             if (file.exists()) {
                 // 拼响应头
                 response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-                response.sendHeaders();
+//                response.sendHeaders();
 //                String head = composeResponseHead(file);
 //                output.write(head.getBytes(StandardCharsets.UTF_8));
                 //读取文件内容，写入输出流
@@ -69,17 +69,4 @@ public class StaticResourceProcessor {
         }
     }
 
-    //拼响应头，填充变量值
-    private String composeResponseHead(File file) {
-        long fileLength = file.length();
-        Map<String,Object> valuesMap = new HashMap<>();
-        valuesMap.put("StatusCode", "200");
-        valuesMap.put("StatusName", "OK");
-        valuesMap.put("ContentType", "text/html;charset=utf-8");
-        valuesMap.put("ContentLength", fileLength);
-        valuesMap.put("ZonedDateTime", DateTimeFormatter.ISO_ZONED_DATE_TIME.format(ZonedDateTime.now()));
-        StrSubstitutor sub = new StrSubstitutor(valuesMap);
-        String responseHead = sub.replace(OKMessage);
-        return responseHead;
-    }
 }
