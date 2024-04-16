@@ -3,14 +3,12 @@ package server;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpResponse implements HttpServletResponse {
@@ -27,6 +25,7 @@ public class HttpResponse implements HttpServletResponse {
     //默认返回OK
     String message = getStatusMessage(HttpServletResponse.SC_OK);
     int status = HttpServletResponse.SC_OK;
+    final ArrayList<Cookie> cookies = new ArrayList<>();
 
     public HttpResponse(OutputStream output) {
         this.output = output;
@@ -96,6 +95,23 @@ public class HttpResponse implements HttpServletResponse {
             outputWriter.print(": ");
             outputWriter.print(value);
             outputWriter.print("\r\n");
+        }
+        HttpSession session = this.request.getSession(false);
+        if (session != null) {
+            Cookie cookie = new Cookie(DefaultHeaders.JSESSIONID_NAME, session.getId());
+            cookie.setMaxAge(-1);
+            addCookie(cookie);
+        }
+        synchronized (cookies) {
+            for (Cookie cookie : cookies) {
+                outputWriter.print(CookieTools.getCookieHeaderName(cookie));
+                outputWriter.print(": ");
+                StringBuffer sbValue = new StringBuffer();
+                CookieTools.getCookieHeaderValue(cookie, sbValue);
+                System.out.println("set cookie jsessionid string : " + sbValue);
+                outputWriter.print(sbValue);
+                outputWriter.print("\r\n");
+            }
         }
         //最后输出空行
         outputWriter.print("\r\n");
@@ -234,7 +250,9 @@ public class HttpResponse implements HttpServletResponse {
 
     @Override
     public void addCookie(Cookie cookie) {
-
+        synchronized (cookies) {
+            cookies.add(cookie);
+        }
     }
 
     @Override
@@ -300,6 +318,7 @@ public class HttpResponse implements HttpServletResponse {
     public OutputStream getOutput() {
         return output;
     }
+
     @Override
     public void setStatus(int status) {
         this.status = status;

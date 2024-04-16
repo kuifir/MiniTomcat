@@ -52,21 +52,22 @@ public class HttpRequest implements HttpServletRequest {
     public void parseRequestLine() {
         //以问号判断是否带有参数串
         int question = requestLine.indexOf("?");
+        String tmp = ";" + DefaultHeaders.JSESSIONID_NAME + "=";
         if (question >= 0) {
             queryString = new String(requestLine.uri, question + 1, requestLine.uriEnd - question - 1);
             uri = new String(requestLine.uri, 0, question);
             //处理参数串中带有jsessionid的情况
-            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+            int semicolon = uri.indexOf(tmp);
             if (semicolon >= 0) {
-                sessionid = uri.substring(semicolon + DefaultHeaders.JSESSIONID_NAME.length());
+                sessionid = uri.substring(semicolon + tmp.length());
                 uri = uri.substring(0, semicolon);
             }
         } else {
             queryString = null;
             this.uri = new String(requestLine.uri, 0, requestLine.uriEnd);
-            int semicolon = uri.indexOf(DefaultHeaders.JSESSIONID_NAME);
+            int semicolon = uri.indexOf(tmp);
             if (semicolon >= 0) {
-                sessionid = uri.substring(semicolon + DefaultHeaders.JSESSIONID_NAME.length());
+                sessionid = uri.substring(semicolon + tmp.length());
                 uri = uri.substring(0, semicolon);
             }
         }
@@ -90,6 +91,7 @@ public class HttpRequest implements HttpServletRequest {
                 }
             }
             String name = new String(header.name, 0, header.nameEnd);
+            name = name.toLowerCase();
             String value = new String(header.value, 0, header.valueEnd);
             // Set the corresponding request headers
             switch (name) {
