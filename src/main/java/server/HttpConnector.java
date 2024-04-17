@@ -19,8 +19,8 @@ public class HttpConnector implements Runnable {
     final Deque<HttpProcessor> processors = new ArrayDeque<>();
     //sessions map存放session
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
-    //一个全局的class loader
-    public static URLClassLoader loader = null;
+    //这是与connector相关联的container
+    ServletContainer container = null;
 
     //创建新的session
     public static Session createSession() {
@@ -61,17 +61,6 @@ public class HttpConnector implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
-        }
-        try {
-            // create a URLClassLoader
-            URL[] urls = new URL[1];
-            URLStreamHandler streamHandler = null;
-            //这个URLClassloader的工作目录设置在HttpServer.WEB_ROOT
-            File classpath = new File(HttpServer.WEB_ROOT);
-            urls[0] = Paths.get(classpath.getCanonicalPath() + File.separator).toUri().toURL();
-            loader = new URLClassLoader(urls);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
         }
 
         // initialize processors pool
@@ -134,5 +123,13 @@ public class HttpConnector implements Runnable {
 
     void recycle(HttpProcessor processor) {
         processors.push(processor);
+    }
+
+    public ServletContainer getContainer() {
+        return container;
+    }
+
+    public void setContainer(ServletContainer container) {
+        this.container = container;
     }
 }

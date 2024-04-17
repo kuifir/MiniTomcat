@@ -20,10 +20,6 @@ public class StaticResourceProcessor {
     private static final int BUFFER_SIZE = 1024;
     //下面的字符串是当文件没有找到时返回的404错误描述
     private static String fileNotFoundMessage = """
-            HTTP/1.1 404 FIle Not Found
-            Content-Type: text/html
-            Content-Length: 23
-                                    
             <h1>File Not Found</h1>
             """;
     //下面的字符串是正常情况下返回的，根据http协议，里面包含了相应的变量。

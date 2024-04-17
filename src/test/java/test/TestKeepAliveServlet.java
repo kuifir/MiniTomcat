@@ -39,7 +39,7 @@ public class TestKeepAliveServlet extends HttpServlet {
         response.getWriter().println(doc);
     }
     public void doPost(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
-        System.out.println("Enter doGet()");
+        System.out.println("Enter doPost()");
         System.out.println("parameter name : "+request.getParameter("name"));
         response.setCharacterEncoding("UTF-8");
         String doc = """

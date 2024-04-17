@@ -3,6 +3,7 @@ package server;
 import server.processor.ServletProcessor;
 import server.processor.StaticResourceProcessor;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -111,7 +112,7 @@ public class HttpProcessor implements Runnable {
                 // check if this is a request for a servlet or a static resource
                 // a request for a servlet begins with "/servlet/"
                 if (request.getUri().startsWith("/servlet/")) {
-                    ServletProcessor processor = new ServletProcessor();
+                    ServletProcessor processor = new ServletProcessor(this.connector);
                     processor.process(request, response);
                 } else {
                     StaticResourceProcessor processor = new StaticResourceProcessor();
@@ -127,7 +128,7 @@ public class HttpProcessor implements Runnable {
             // close the socket
             socket.close();
             socket = null;
-        } catch (IOException e) {
+        } catch (IOException | ServletException e) {
             throw new RuntimeException(e);
         }
     }
