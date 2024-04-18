@@ -1,19 +1,12 @@
-package server.processor;
+package com.kuifir.mini.connector.http;
 
-import org.apache.commons.lang3.text.StrSubstitutor;
-import server.HttpRequest;
-import server.HttpResponse;
-import server.HttpServer;
+import com.kuifir.mini.startup.Bootstrap;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 public class StaticResourceProcessor {
 
@@ -32,13 +25,13 @@ public class StaticResourceProcessor {
                          
             """;
 
-    public void process(HttpRequest request, HttpResponse response) throws IOException {
+    public void process(HttpRequestImpl request, HttpResponseImpl response) throws IOException {
         byte[] bytes = new byte[BUFFER_SIZE];
         FileInputStream fis = null;
         OutputStream output = null;
         try {
             output = response.getOutput();
-            File file = new File(HttpServer.WEB_ROOT, request.getUri());
+            File file = new File(Bootstrap.WEB_ROOT, request.getUri());
             if (file.exists()) {
                 // 拼响应头
                 response.setCharacterEncoding(StandardCharsets.UTF_8.name());

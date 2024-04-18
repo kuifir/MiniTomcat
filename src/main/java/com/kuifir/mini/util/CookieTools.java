@@ -1,4 +1,4 @@
-package server;
+package com.kuifir.mini.util;
 
 import javax.servlet.http.Cookie;
 

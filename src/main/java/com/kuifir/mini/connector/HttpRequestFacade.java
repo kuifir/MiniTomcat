@@ -1,4 +1,4 @@
-package server;
+package com.kuifir.mini.connector;
 
 import javax.servlet.*;
 import javax.servlet.ServletContext;

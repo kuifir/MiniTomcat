@@ -1,4 +1,6 @@
-package server;
+package com.kuifir.mini.core;
+
+import com.kuifir.mini.Container;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

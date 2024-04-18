@@ -1,4 +1,4 @@
-package server;
+package com.kuifir.mini.connector.http;
 
 public class HttpRequestLine {
     public static final int INITIAL_METHOD_SIZE = 8;

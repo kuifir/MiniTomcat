@@ -1,7 +1,9 @@
-package server;
+package com.kuifir.mini.connector.http;
+
+import com.kuifir.mini.Request;
+import com.kuifir.mini.session.StandardSessionFacade;
 
 import javax.servlet.*;
-import javax.servlet.ServletContext;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +15,7 @@ import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpRequest implements HttpServletRequest {
+public class HttpRequestImpl implements HttpServletRequest {
     private InputStream input;
     private SocketInputStream sis;
     private String uri;
@@ -29,12 +31,13 @@ public class HttpRequest implements HttpServletRequest {
     Cookie[] cookies;
     HttpSession session;
     String sessionid;
-    SessionFacade sessionFacade;
-    private HttpResponse response;
+    StandardSessionFacade sessionFacade;
+    private HttpResponseImpl response;
 
-    public HttpRequest() {
+    public HttpRequestImpl() {
     }
-    public HttpRequest(InputStream input) {
+
+    public HttpRequestImpl(InputStream input) {
         this.input = input;
         this.sis = new SocketInputStream(this.input, 2048);
     }
@@ -44,7 +47,7 @@ public class HttpRequest implements HttpServletRequest {
         this.sis = new SocketInputStream(this.input, 2048);
     }
 
-    public void setResponse(HttpResponse response) {
+    public void setResponse(HttpResponseImpl response) {
         this.response = response;
     }
 
@@ -387,17 +390,17 @@ public class HttpRequest implements HttpServletRequest {
         if (sessionid != null) {
             session = HttpConnector.sessions.get(sessionid);
             if (session != null) {
-                sessionFacade = new SessionFacade(session);
+                sessionFacade = new StandardSessionFacade(session);
                 return sessionFacade;
             } else {
                 session = HttpConnector.createSession();
-                sessionFacade = new SessionFacade(session);
-                HttpConnector.sessions.put(sessionid,session);
+                sessionFacade = new StandardSessionFacade(session);
+                HttpConnector.sessions.put(sessionid, session);
                 return sessionFacade;
             }
         } else {
             session = HttpConnector.createSession();
-            sessionFacade = new SessionFacade(session);
+            sessionFacade = new StandardSessionFacade(session);
             sessionid = session.getId();
             return sessionFacade;
         }

@@ -1,4 +1,7 @@
-package server;
+package com.kuifir.mini.connector.http;
+
+import com.kuifir.mini.Response;
+import com.kuifir.mini.util.CookieTools;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
@@ -11,8 +14,8 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpResponse implements HttpServletResponse {
-    HttpRequest request;
+public class HttpResponseImpl implements HttpServletResponse {
+    HttpRequestImpl request;
     OutputStream output;
     PrintWriter writer;
     String contentType = null;
@@ -27,7 +30,7 @@ public class HttpResponse implements HttpServletResponse {
     int status = HttpServletResponse.SC_OK;
     final ArrayList<Cookie> cookies = new ArrayList<>();
 
-    public HttpResponse(OutputStream output) {
+    public HttpResponseImpl(OutputStream output) {
         this.output = output;
     }
 
@@ -40,7 +43,7 @@ public class HttpResponse implements HttpServletResponse {
         }
     }
 
-    public void setRequest(HttpRequest request) {
+    public void setRequest(HttpRequestImpl request) {
         this.request = request;
     }
 

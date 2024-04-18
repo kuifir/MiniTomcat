@@ -1,4 +1,7 @@
-package server;
+package com.kuifir.mini.connector.http;
+
+import com.kuifir.mini.core.StandardContext;
+import com.kuifir.mini.session.StandardSession;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -18,11 +21,11 @@ public class HttpConnector implements Runnable {
     //sessions map存放session
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
     //这是与connector相关联的container
-    ServletContext container = null;
+    StandardContext container = null;
 
     //创建新的session
-    public static Session createSession() {
-        Session session = new Session();
+    public static StandardSession createSession() {
+        StandardSession session = new StandardSession();
         session.setValid(true);
         session.setCreationTime(System.currentTimeMillis());
         String sessionId = generateSessionId();
@@ -123,11 +126,11 @@ public class HttpConnector implements Runnable {
         processors.push(processor);
     }
 
-    public ServletContext getContainer() {
+    public StandardContext getContainer() {
         return container;
     }
 
-    public void setContainer(ServletContext container) {
+    public void setContainer(StandardContext container) {
         this.container = container;
     }
 }

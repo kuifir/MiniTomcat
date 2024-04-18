@@ -1,4 +1,6 @@
-package server;
+package com.kuifir.mini.session;
+
+import com.kuifir.mini.Session;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -8,7 +10,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Session implements HttpSession {
+public class StandardSession implements HttpSession, Session {
     private String sessionid;
     private long creationTime;
     private boolean valid;
@@ -36,6 +38,16 @@ public class Session implements HttpSession {
 
     @Override
     public void setMaxInactiveInterval(int interval) {
+    }
+
+    @Override
+    public void setNew(boolean isNew) {
+
+    }
+
+    @Override
+    public HttpSession getSession() {
+        return null;
     }
 
     @Override
@@ -101,11 +113,36 @@ public class Session implements HttpSession {
         this.valid = b;
     }
 
+    @Override
+    public boolean isValid() {
+        return false;
+    }
+
+    @Override
+    public void access() {
+
+    }
+
+    @Override
+    public void expire() {
+
+    }
+
+    @Override
+    public void recycle() {
+
+    }
+
     public void setCreationTime(long currentTimeMillis) {
         this.creationTime = currentTimeMillis;
     }
 
     public void setId(String sessionId) {
         this.sessionid = sessionId;
+    }
+
+    @Override
+    public String getInfo() {
+        return null;
     }
 }

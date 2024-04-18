@@ -1,4 +1,4 @@
-package server;
+package com.kuifir.mini;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package server;
+package com.kuifir.mini.connector.http;
 
 public class HttpHeader {
     public static final int INITIAL_NAME_SIZE = 64;

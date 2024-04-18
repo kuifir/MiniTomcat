@@ -1,4 +1,4 @@
-package server;
+package com.kuifir.mini.connector.http;
 
 public class DefaultHeaders {
     static final String HOST_NAME = "host";

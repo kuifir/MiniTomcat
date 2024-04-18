@@ -1,7 +1,4 @@
-package server;
-
-import server.processor.ServletProcessor;
-import server.processor.StaticResourceProcessor;
+package com.kuifir.mini.connector.http;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -92,9 +89,9 @@ public class HttpProcessor implements Runnable {
             // 添加keepAlive处理
             while (keepAlive) {
                 // create Request object and parse
-                HttpRequest request = new HttpRequest(input);
+                HttpRequestImpl request = new HttpRequestImpl(input);
                 // create Response object
-                HttpResponse response = new HttpResponse(output);
+                HttpResponseImpl response = new HttpResponseImpl(output);
                 response.setRequest(request);
                 request.setResponse(response);
 
@@ -133,7 +130,7 @@ public class HttpProcessor implements Runnable {
         }
     }
 
-    private void finishResponse(HttpResponse response) {
+    private void finishResponse(HttpResponseImpl response) {
         response.finishResponse();
     }
 }

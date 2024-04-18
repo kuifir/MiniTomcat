@@ -1,4 +1,7 @@
-package server;
+package com.kuifir.mini.core;
+
+import com.kuifir.mini.Container;
+import com.kuifir.mini.Wrapper;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -7,12 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
-public class ServletWrapper extends ContainerBase {
+public class StandardWrapper extends ContainerBase implements Wrapper {
     //wrapper内含了一个servlet实例和类
     private Servlet instance = null;
     private String servletClass;
 
-    public ServletWrapper(String servletClass, ServletContext parent) {
+    public StandardWrapper(String servletClass, StandardContext parent) {
         //以ServletContext为parent
         this.parent = parent;
         this.servletClass = servletClass;
@@ -24,20 +27,14 @@ public class ServletWrapper extends ContainerBase {
     }
 
 
-    public String getServletClass() {
-        return servletClass;
-    }
 
-    public void setServletClass(String servletClass) {
-        this.servletClass = servletClass;
-    }
 
     @Override
     public String getInfo() {
         return "Mini Servlet Wrapper, version 0.1";
     }
 
-    public void setParent(ServletContext container) {
+    public void setParent(StandardContext container) {
         parent = container;
     }
 
@@ -97,5 +94,53 @@ public class ServletWrapper extends ContainerBase {
     }
 
     public void removeChild(Container child) {
+    }
+
+    @Override
+    public int getLoadOnStartup() {
+        return 0;
+    }
+
+    @Override
+    public void setLoadOnStartup(int value) {
+
+    }
+
+    public String getServletClass() {
+        return servletClass;
+    }
+
+    public void setServletClass(String servletClass) {
+        this.servletClass = servletClass;
+    }
+
+    @Override
+    public void addInitParameter(String name, String value) {
+
+    }
+
+    @Override
+    public Servlet allocate() throws ServletException {
+        return null;
+    }
+
+    @Override
+    public String findInitParameter(String name) {
+        return null;
+    }
+
+    @Override
+    public String[] findInitParameters() {
+        return new String[0];
+    }
+
+    @Override
+    public void load() throws ServletException {
+
+    }
+
+    @Override
+    public void removeInitParameter(String name) {
+
     }
 }
