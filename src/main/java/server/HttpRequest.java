@@ -1,6 +1,7 @@
 package server;
 
 import javax.servlet.*;
+import javax.servlet.ServletContext;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -391,6 +392,7 @@ public class HttpRequest implements HttpServletRequest {
             } else {
                 session = HttpConnector.createSession();
                 sessionFacade = new SessionFacade(session);
+                HttpConnector.sessions.put(sessionid,session);
                 return sessionFacade;
             }
         } else {

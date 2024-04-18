@@ -7,14 +7,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
-public class ServletWrapper {
+public class ServletWrapper extends ContainerBase {
+    //wrapper内含了一个servlet实例和类
     private Servlet instance = null;
     private String servletClass;
-    private ClassLoader loader;
-    private String name;
-    protected ServletContainer parent = null;
 
-    public ServletWrapper(String servletClass, ServletContainer parent) {
+    public ServletWrapper(String servletClass, ServletContext parent) {
+        //以ServletContext为parent
         this.parent = parent;
         this.servletClass = servletClass;
         try {
@@ -24,11 +23,6 @@ public class ServletWrapper {
         }
     }
 
-    public ClassLoader getLoader() {
-        if (loader != null)
-            return loader;
-        return ServletContainer.getLoader();
-    }
 
     public String getServletClass() {
         return servletClass;
@@ -38,11 +32,12 @@ public class ServletWrapper {
         this.servletClass = servletClass;
     }
 
-    public ServletContainer getParent() {
-        return parent;
+    @Override
+    public String getInfo() {
+        return "Mini Servlet Wrapper, version 0.1";
     }
 
-    public void setParent(ServletContainer container) {
+    public void setParent(ServletContext container) {
         parent = container;
     }
 
@@ -50,6 +45,7 @@ public class ServletWrapper {
         return this.instance;
     }
 
+    // load servlet类，创建新实例，并调用init()方法
     public Servlet loadServlet() throws ServletException {
         if (instance != null)
             return instance;
@@ -81,10 +77,25 @@ public class ServletWrapper {
         return servlet;
     }
 
+    //wrapper是最底层容器，调用将转化为service()方法
     public void invoke(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
         if (instance != null) {
             instance.service(request, response);
         }
+    }
+
+    public void addChild(Container child) {
+    }
+
+    public Container findChild(String name) {
+        return null;
+    }
+
+    public Container[] findChildren() {
+        return null;
+    }
+
+    public void removeChild(Container child) {
     }
 }

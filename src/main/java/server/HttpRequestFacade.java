@@ -1,6 +1,7 @@
 package server;
 
 import javax.servlet.*;
+import javax.servlet.ServletContext;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class HttpRequestFacade implements HttpServletRequest {
     private HttpServletRequest request;
 
-    public HttpRequestFacade(HttpRequest request) {
+    public HttpRequestFacade(HttpServletRequest request) {
         this.request = request;
     }
 

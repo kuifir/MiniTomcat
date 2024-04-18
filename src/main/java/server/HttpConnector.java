@@ -1,10 +1,8 @@
 package server;
 
 import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.io.IOException;
 import java.net.*;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -20,7 +18,7 @@ public class HttpConnector implements Runnable {
     //sessions map存放session
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
     //这是与connector相关联的container
-    ServletContainer container = null;
+    ServletContext container = null;
 
     //创建新的session
     public static Session createSession() {
@@ -125,11 +123,11 @@ public class HttpConnector implements Runnable {
         processors.push(processor);
     }
 
-    public ServletContainer getContainer() {
+    public ServletContext getContainer() {
         return container;
     }
 
-    public void setContainer(ServletContainer container) {
+    public void setContainer(ServletContext container) {
         this.container = container;
     }
 }

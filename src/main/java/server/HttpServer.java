@@ -8,7 +8,7 @@ public class HttpServer {
     public static void main(String[] args) {
         //创建connector和container
         HttpConnector connector = new HttpConnector();
-        ServletContainer container = new ServletContainer();
+        ServletContext container = new ServletContext();
         connector.setContainer(container);
         container.setConnector(connector);
         connector.start();
