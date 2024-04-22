@@ -1,18 +1,21 @@
 package com.kuifir.mini.connector.http;
 
+import com.kuifir.mini.*;
 import com.kuifir.mini.core.StandardContext;
 import com.kuifir.mini.session.StandardSession;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpConnector implements Runnable {
+public class HttpConnector implements Connector, Runnable {
     int minProcessors = 3;
     int maxProcessors = 10;
     int curProcessors = 0;
@@ -21,7 +24,10 @@ public class HttpConnector implements Runnable {
     //sessions map存放session
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
     //这是与connector相关联的container
-    StandardContext container = null;
+    Container container = null;
+    private String info = "com.mini.connector.http.HttpConnector/0.1";
+    private int port = 8080;
+    private String threadName = null;
 
     //创建新的session
     public static StandardSession createSession() {
@@ -56,7 +62,6 @@ public class HttpConnector implements Runnable {
     @Override
     public void run() {
         ServerSocket serverSocket = null;
-        int port = 8080;
         try {
             serverSocket = new ServerSocket(port, 1, InetAddress.getByName("127.0.0.1"));
         } catch (IOException e) {
@@ -93,6 +98,8 @@ public class HttpConnector implements Runnable {
     }
 
     public void start() {
+        threadName = "HttpConnector[" + port + "]";
+        log("httpConnector.starting " + threadName);
         Thread thread = new Thread(this);
         thread.start();
     }
@@ -119,18 +126,75 @@ public class HttpConnector implements Runnable {
         initProcessor.start();
         processors.push(initProcessor);
         curProcessors++;
+        log("newProcessor");
         return processors.pop();
+    }
+
+    //记录日志
+    private void log(String message) {
+        Logger logger = container.getLogger();
+        String localName = threadName;
+        if (localName == null) localName = "HttpConnector";
+        if (logger != null) {
+            logger.log(localName + " " + message);
+        } else {
+            System.out.println(localName + " " + message);
+        }
+    }
+
+    //记录日志
+    private void log(String message, Throwable throwable) {
+        Logger logger = container.getLogger();
+        String localName = threadName;
+        if (localName == null) localName = "HttpConnector";
+        if (logger != null) logger.log(localName + " " + message, throwable);
+        else {
+            System.out.println(localName + " " + message);
+            throwable.printStackTrace(System.out);
+        }
     }
 
     void recycle(HttpProcessor processor) {
         processors.push(processor);
     }
 
-    public StandardContext getContainer() {
+    public Container getContainer() {
         return container;
     }
 
-    public void setContainer(StandardContext container) {
+    @Override
+    public void setContainer(Container container) {
         this.container = container;
     }
+
+    @Override
+    public String getInfo() {
+        return this.info;
+    }
+
+    @Override
+    public String getScheme() {
+        return null;
+    }
+
+    @Override
+    public void setScheme(String scheme) {
+
+    }
+
+    @Override
+    public Request createRequest() {
+        return null;
+    }
+
+    @Override
+    public Response createResponse() {
+        return null;
+    }
+
+    @Override
+    public void initialize() {
+
+    }
+
 }

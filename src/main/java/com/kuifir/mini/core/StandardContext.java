@@ -40,7 +40,7 @@ public class StandardContext extends ContainerBase implements Context {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
+        log("Container created.");
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StandardContext extends ContainerBase implements Context {
     public void invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         StandardWrapper standardWrapper = null;
         // 首先根据uri最后一个/号来定位，后面的字符串认为是servlet名字
-        String uri = ((HttpRequestImpl)request).getUri();
+        String uri = ((HttpRequestImpl) request).getUri();
         String servletName = uri.substring(uri.lastIndexOf("/") + 1);
         String servletClassName = servletName;
 
@@ -61,7 +61,7 @@ public class StandardContext extends ContainerBase implements Context {
         standardWrapper = servletInstanceMap.get(servletName);
         //如果容器内没有这个servlet，先要load类，创建新实例
         if (Objects.isNull(standardWrapper)) {
-            standardWrapper = new StandardWrapper(servletClassName,this);
+            standardWrapper = new StandardWrapper(servletClassName, this);
             this.servletClsMap.put(servletName, servletClassName);
             this.servletInstanceMap.put(servletName, standardWrapper);
         }
@@ -77,6 +77,7 @@ public class StandardContext extends ContainerBase implements Context {
         }
 
     }
+
     public void setLoader(URLClassLoader loader) {
         this.loader = loader;
     }

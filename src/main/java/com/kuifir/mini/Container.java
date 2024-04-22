@@ -9,27 +9,31 @@ public interface Container {
     static final String ADD_CHILD_EVENT = "addChild";
     static final String REMOVE_CHILD_EVENT = "removeChild";
 
-     String getInfo();
+    String getInfo();
 
-     ClassLoader getLoader();
+    ClassLoader getLoader();
 
-     void setLoader(ClassLoader loader);
+    void setLoader(ClassLoader loader);
 
-     String getName();
+    String getName();
 
-     void setName(String name);
+    void setName(String name);
 
-     Container getParent();
+    Container getParent();
 
-     void setParent(Container container);
+    void setParent(Container container);
 
-     void addChild(Container child);
+    void addChild(Container child);
 
-     Container findChild(String name);
+    Container findChild(String name);
 
-     Container[] findChildren();
+    Container[] findChildren();
 
-     void invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
+    void invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
 
-     void removeChild(Container child);
+    void removeChild(Container child);
+
+    Logger getLogger();
+
+    void setLogger(Logger logger);
 }

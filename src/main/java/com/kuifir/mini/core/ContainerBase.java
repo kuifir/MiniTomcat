@@ -1,6 +1,7 @@
 package com.kuifir.mini.core;
 
 import com.kuifir.mini.Container;
+import com.kuifir.mini.Logger;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,8 +15,37 @@ public abstract class ContainerBase implements Container {
     //父容器
     protected Container parent = null;
 
+    //ContainerBase中增加与日志相关的代码
+    protected Logger logger = null;
+
     //下面是基本的get和set方法
     public abstract String getInfo();
+
+    protected void log(String message) {
+        Logger logger = getLogger();
+        if (logger != null) {
+            logger.log(logName() + ": " + message);
+        } else {
+            System.out.println(logName() + ": " + message);
+        }
+    }
+
+    protected void log(String message, Throwable throwable) {
+        Logger logger = getLogger();
+        if (logger != null) {
+            logger.log(logName() + ": " + message, throwable);
+        } else {
+            System.out.println(logName() + ": " + message + ": " + throwable);
+            throwable.printStackTrace(System.out);
+        }
+    }
+
+    protected String logName() {
+        String className = this.getClass().getName();
+        int period = className.lastIndexOf(".");
+        if (period >= 0) className = className.substring(period + 1);
+        return (className + "[" + getName() + "]");
+    }
 
     public ClassLoader getLoader() {
         if (loader != null)
@@ -88,5 +118,19 @@ public abstract class ContainerBase implements Container {
             children.remove(child.getName());
         }
         child.setParent(null);
+    }
+
+    @Override
+    public Logger getLogger() {
+        if (logger != null) return (logger);
+        if (parent != null) return (parent.getLogger());
+        return (null);
+    }
+
+    @Override
+    public void setLogger(Logger logger) {
+        Logger oldLogger = this.logger;
+        if (oldLogger == logger) return;
+        this.logger = logger;
     }
 }
