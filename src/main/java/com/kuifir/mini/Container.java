@@ -29,7 +29,7 @@ public interface Container {
 
     Container[] findChildren();
 
-    void invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
+    void invoke(Request request, Response response) throws IOException, ServletException;
 
     void removeChild(Container child);
 

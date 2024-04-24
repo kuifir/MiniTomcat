@@ -1,24 +1,20 @@
 package com.kuifir.mini.core;
 
 import com.kuifir.mini.Context;
+import com.kuifir.mini.Request;
+import com.kuifir.mini.Response;
 import com.kuifir.mini.Wrapper;
-import com.kuifir.mini.connector.HttpRequestFacade;
-import com.kuifir.mini.connector.HttpResponseFacade;
 import com.kuifir.mini.connector.http.HttpConnector;
-import com.kuifir.mini.connector.http.HttpRequestImpl;
 import com.kuifir.mini.startup.Bootstrap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StandardContext extends ContainerBase implements Context {
@@ -30,6 +26,8 @@ public class StandardContext extends ContainerBase implements Context {
     Map<String, StandardWrapper> servletInstanceMap = new ConcurrentHashMap<>();//servletName - servlet
 
     public StandardContext() {
+        super();
+        pipeline.setBasic(new StandardContextValve());
         try {
             // create a URLClassLoader
             URL[] urls = new URL[1];
@@ -50,32 +48,45 @@ public class StandardContext extends ContainerBase implements Context {
 
     //invoke方法用于从map中找到相关的servlet，然后调用
     @Override
-    public void invoke(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        StandardWrapper standardWrapper = null;
-        // 首先根据uri最后一个/号来定位，后面的字符串认为是servlet名字
-        String uri = ((HttpRequestImpl) request).getUri();
-        String servletName = uri.substring(uri.lastIndexOf("/") + 1);
-        String servletClassName = servletName;
+    public void invoke(Request request, Response response) throws IOException, ServletException {
+        System.out.println("StandardContext invoke()");
+        super.invoke(request, response);
+//        StandardWrapper standardWrapper = null;
+//        // 首先根据uri最后一个/号来定位，后面的字符串认为是servlet名字
+//        String uri = ((HttpRequestImpl) request).getUri();
+//        String servletName = uri.substring(uri.lastIndexOf("/") + 1);
+//        String servletClassName = servletName;
+//
+//        //从容器中获取servlet wrapper
+//        standardWrapper = servletInstanceMap.get(servletName);
+//        //如果容器内没有这个servlet，先要load类，创建新实例
+//        if (Objects.isNull(standardWrapper)) {
+//            standardWrapper = new StandardWrapper(servletClassName, this);
+//            this.servletClsMap.put(servletName, servletClassName);
+//            this.servletInstanceMap.put(servletName, standardWrapper);
+//        }
+//
+//        //然后将调用传递到下层容器即wrapper中,调用service()
+//        try {
+//            HttpRequestFacade requestFacade = new HttpRequestFacade(request);
+//            HttpResponseFacade responseFacade = new HttpResponseFacade(response);
+//            System.out.println("Call Service()");
+//            standardWrapper.invoke(requestFacade, responseFacade);
+//        } catch (Throwable e) {
+//            System.out.println(e.getMessage());
+//        }
 
-        //从容器中获取servlet wrapper
-        standardWrapper = servletInstanceMap.get(servletName);
-        //如果容器内没有这个servlet，先要load类，创建新实例
-        if (Objects.isNull(standardWrapper)) {
-            standardWrapper = new StandardWrapper(servletClassName, this);
-            this.servletClsMap.put(servletName, servletClassName);
-            this.servletInstanceMap.put(servletName, standardWrapper);
+    }
+
+    public Wrapper getWrapper(String name) {
+        StandardWrapper servletWrapper = servletInstanceMap.get(name);
+        if (servletWrapper == null) {
+            String servletClassName = name;
+            servletWrapper = new StandardWrapper(servletClassName, this);
+            this.servletClsMap.put(name, servletClassName);
+            this.servletInstanceMap.put(name, servletWrapper);
         }
-
-        //然后将调用传递到下层容器即wrapper中,调用service()
-        try {
-            HttpRequestFacade requestFacade = new HttpRequestFacade(request);
-            HttpResponseFacade responseFacade = new HttpResponseFacade(response);
-            System.out.println("Call Service()");
-            standardWrapper.invoke(requestFacade, responseFacade);
-        } catch (Throwable e) {
-            System.out.println(e.getMessage());
-        }
-
+        return servletWrapper;
     }
 
     public void setLoader(URLClassLoader loader) {

@@ -4,6 +4,7 @@ import com.kuifir.mini.connector.http.HttpConnector;
 import com.kuifir.mini.core.StandardContext;
 import com.kuifir.mini.Logger;
 import com.kuifir.mini.logger.FileLogger;
+import com.kuifir.mini.valves.AccessLogValve;
 
 import java.io.File;
 

@@ -1,7 +1,10 @@
 package com.kuifir.mini.core;
 
 import com.kuifir.mini.Container;
+import com.kuifir.mini.Request;
+import com.kuifir.mini.Response;
 import com.kuifir.mini.Wrapper;
+import com.kuifir.mini.valves.AccessLogValve;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -16,6 +19,9 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
     private String servletClass;
 
     public StandardWrapper(String servletClass, StandardContext parent) {
+        super();
+        pipeline.setBasic(new StandardWrapperValve());
+        pipeline.addValve(new AccessLogValve());
         //以ServletContext为parent
         this.parent = parent;
         this.servletClass = servletClass;
@@ -25,8 +31,6 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
             e.printStackTrace();
         }
     }
-
-
 
 
     @Override
@@ -75,11 +79,11 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
     }
 
     //wrapper是最底层容器，调用将转化为service()方法
-    public void invoke(HttpServletRequest request, HttpServletResponse response)
+    @Override
+    public void invoke(Request request, Response response)
             throws IOException, ServletException {
-        if (instance != null) {
-            instance.service(request, response);
-        }
+        System.out.println("StandardWrapper invoke()");
+        super.invoke(request, response);
     }
 
     public void addChild(Container child) {

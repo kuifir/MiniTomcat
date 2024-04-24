@@ -1,6 +1,6 @@
 package com.kuifir.mini.connector.http;
 
-import com.kuifir.mini.Request;
+import com.kuifir.mini.*;
 import com.kuifir.mini.session.StandardSessionFacade;
 
 import javax.servlet.*;
@@ -15,7 +15,7 @@ import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpRequestImpl implements HttpServletRequest {
+public class HttpRequestImpl implements HttpServletRequest,Request {
     private InputStream input;
     private SocketInputStream sis;
     private String uri;
@@ -42,9 +42,119 @@ public class HttpRequestImpl implements HttpServletRequest {
         this.sis = new SocketInputStream(this.input, 2048);
     }
 
+    @Override
+    public Connector getConnector() {
+        return null;
+    }
+
+    @Override
+    public void setConnector(Connector connector) {
+
+    }
+
+    @Override
+    public Context getContext() {
+        return null;
+    }
+
+    @Override
+    public void setContext(Context context) {
+
+    }
+
+    @Override
+    public String getInfo() {
+        return null;
+    }
+
+    @Override
+    public ServletRequest getRequest() {
+        return this;
+    }
+
+    @Override
+    public Response getResponse() {
+        return null;
+    }
+
+    @Override
+    public void setResponse(Response response) {
+
+    }
+
+    @Override
+    public Socket getSocket() {
+        return null;
+    }
+
+    @Override
+    public void setSocket(Socket socket) {
+
+    }
+
+    @Override
+    public InputStream getStream() {
+        return null;
+    }
+
     public void setStream(InputStream input) {
         this.input = input;
         this.sis = new SocketInputStream(this.input, 2048);
+    }
+
+    @Override
+    public Wrapper getWrapper() {
+        return null;
+    }
+
+    @Override
+    public void setWrapper(Wrapper wrapper) {
+
+    }
+
+    @Override
+    public ServletInputStream createInputStream() throws IOException {
+        return null;
+    }
+
+    @Override
+    public void finishRequest() throws IOException {
+
+    }
+
+    @Override
+    public void recycle() {
+
+    }
+
+    @Override
+    public void setContentLength(int length) {
+
+    }
+
+    @Override
+    public void setContentType(String type) {
+
+    }
+
+    @Override
+    public void setProtocol(String protocol) {
+
+    }
+
+    @Override
+    public void setRemoteAddr(String remote) {
+
+    }
+
+    @Override
+    public void setScheme(String scheme) {
+
+    }
+
+    @Override
+    public void setServerPort(int port) {
+
     }
 
     public void setResponse(HttpResponseImpl response) {

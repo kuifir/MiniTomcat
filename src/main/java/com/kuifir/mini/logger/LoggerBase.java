@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 public abstract class LoggerBase implements Logger {
     protected int debug = 0;
-    protected static final String info = "com.mini.logger.LoggerBase/1.0";
+    protected static final String info = "com.kuifir.mini.logger.LoggerBase/1.0";
     protected int verbosity = ERROR;
 
     public int getDebug() {

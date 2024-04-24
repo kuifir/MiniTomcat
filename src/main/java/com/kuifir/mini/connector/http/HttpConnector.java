@@ -25,7 +25,7 @@ public class HttpConnector implements Connector, Runnable {
     public static Map<String, HttpSession> sessions = new ConcurrentHashMap<>();
     //这是与connector相关联的container
     Container container = null;
-    private String info = "com.mini.connector.http.HttpConnector/0.1";
+    private String info = "com.kuifir.mini.connector.http.HttpConnector/0.1";
     private int port = 8080;
     private String threadName = null;
 

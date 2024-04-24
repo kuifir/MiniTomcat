@@ -1,12 +1,15 @@
 package com.kuifir.mini.core;
 
-import com.kuifir.mini.Container;
-import com.kuifir.mini.Logger;
+import com.kuifir.mini.*;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class ContainerBase implements Container {
+public abstract class ContainerBase implements Container, Pipeline {
     //子容器
     protected final Map<String, Container> children = new ConcurrentHashMap<>();
     //类加载器
@@ -17,6 +20,35 @@ public abstract class ContainerBase implements Container {
 
     //ContainerBase中增加与日志相关的代码
     protected Logger logger = null;
+    //增加pipeline支持
+    protected Pipeline pipeline = new StandardPipeline(this);
+
+    @Override
+    public void invoke(Request request, Response response) throws IOException, ServletException {
+        System.out.println("ContainerBase invoke()");
+        pipeline.invoke(request, response);
+    }
+
+    @Override
+    public synchronized void addValve(Valve valve) {
+        pipeline.addValve(valve);
+    }
+    @Override
+    public Valve getBasic() {
+        return (pipeline.getBasic());
+    }
+    @Override
+    public Valve[] getValves() {
+        return (pipeline.getValves());
+    }
+    @Override
+    public synchronized void removeValve(Valve valve) {
+        pipeline.removeValve(valve);
+    }
+    @Override
+    public void setBasic(Valve valve) {
+        pipeline.setBasic(valve);
+    }
 
     //下面是基本的get和set方法
     public abstract String getInfo();
@@ -132,5 +164,9 @@ public abstract class ContainerBase implements Container {
         Logger oldLogger = this.logger;
         if (oldLogger == logger) return;
         this.logger = logger;
+    }
+
+    public Pipeline getPipeline() {
+        return pipeline;
     }
 }
