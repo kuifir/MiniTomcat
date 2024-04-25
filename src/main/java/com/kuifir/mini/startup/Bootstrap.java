@@ -1,10 +1,11 @@
 package com.kuifir.mini.startup;
 
-import com.kuifir.mini.connector.http.HttpConnector;
-import com.kuifir.mini.core.StandardContext;
 import com.kuifir.mini.Logger;
+import com.kuifir.mini.connector.http.HttpConnector;
+import com.kuifir.mini.core.FilterDef;
+import com.kuifir.mini.core.FilterMap;
+import com.kuifir.mini.core.StandardContext;
 import com.kuifir.mini.logger.FileLogger;
-import com.kuifir.mini.valves.AccessLogValve;
 
 import java.io.File;
 
@@ -21,8 +22,21 @@ public class Bootstrap {
         StandardContext container = new StandardContext();
         connector.setContainer(container);
         container.setConnector(connector);
+        // 添加日志组件
         Logger logger = new FileLogger();
         container.setLogger(logger);
+        container.setLogger(logger);
+        // 添加过滤器
+        FilterDef filterDef = new FilterDef();
+        filterDef.setFilterName("TestFilter");
+        filterDef.setFilterClass("test.TestFilter");
+        container.addFilterDef(filterDef);
+        FilterMap filterMap = new FilterMap();
+        filterMap.setFilterName("TestFilter");
+        filterMap.setURLPattern("/*");
+        container.addFilterMap(filterMap);
+        container.filterStart();
+
         connector.start();
     }
 
