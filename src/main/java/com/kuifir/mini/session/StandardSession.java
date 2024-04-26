@@ -1,10 +1,13 @@
 package com.kuifir.mini.session;
 
 import com.kuifir.mini.Session;
+import com.kuifir.mini.SessionEvent;
+import com.kuifir.mini.SessionListener;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
@@ -15,6 +18,37 @@ public class StandardSession implements HttpSession, Session {
     private long creationTime;
     private boolean valid;
     private Map<String, Object> attributes = new ConcurrentHashMap<>();
+
+    private transient ArrayList<SessionListener> listeners = new ArrayList<>();
+
+    public void addSessionListener(SessionListener listener) {
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+
+    public void removeSessionListener(SessionListener listener) {
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+
+    public void fireSessionEvent(String type, Object data) {
+        if (listeners.isEmpty()) return;
+        SessionEvent event = new SessionEvent(this, type, data);
+        SessionListener[] list = new SessionListener[0];
+        synchronized (listeners) {
+            list = listeners.toArray(list);
+        }
+        for (SessionListener sessionListener : list) {
+            sessionListener.sessionEvent(event);
+        }
+    }
+
+    public void setId(String sessionId) {
+        this.sessionid = sessionId;
+        fireSessionEvent(Session.SESSION_CREATED_EVENT, null);
+    }
 
     @Override
     public long getCreationTime() {
@@ -137,9 +171,6 @@ public class StandardSession implements HttpSession, Session {
         this.creationTime = currentTimeMillis;
     }
 
-    public void setId(String sessionId) {
-        this.sessionid = sessionId;
-    }
 
     @Override
     public String getInfo() {

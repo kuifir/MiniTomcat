@@ -1,9 +1,6 @@
 package com.kuifir.mini.core;
 
-import com.kuifir.mini.Context;
-import com.kuifir.mini.Request;
-import com.kuifir.mini.Response;
-import com.kuifir.mini.Wrapper;
+import com.kuifir.mini.*;
 import com.kuifir.mini.connector.http.HttpConnector;
 import com.kuifir.mini.startup.Bootstrap;
 
@@ -15,6 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +29,9 @@ public class StandardContext extends ContainerBase implements Context {
     private Map<String, FilterDef> filterDefs = new ConcurrentHashMap<>();
     private FilterMap[] filterMaps = new FilterMap[0];
 
+    private ArrayList<ContainerListenerDef> listenerDefs = new ArrayList<>();
+    private ArrayList<ContainerListener> listeners = new ArrayList<>();
+
     public StandardContext() {
         super();
         pipeline.setBasic(new StandardContextValve());
@@ -45,6 +46,73 @@ public class StandardContext extends ContainerBase implements Context {
             System.out.println(e.getMessage());
         }
         log("Container created.");
+    }
+
+    public void start() {
+        // 触发一个容器启动事件
+        fireContainerEvent("Container Started", this);
+    }
+
+    public void addContainerListener(ContainerListener listener) {
+        // 添加一个新的容器监听器到监听器列表，并确保线程安全
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
+    }
+
+    public void removeContainerListener(ContainerListener listener) {
+        // 移除指定的容器监听器，并确保线程安全
+        synchronized (listeners) {
+            listeners.remove(listener);
+        }
+    }
+
+    public void fireContainerEvent(String type, Object data) {
+        // 检查是否已经有监听器，如果没有则直接返回
+        if (listeners.isEmpty()) {
+            return;
+        }
+        ContainerEvent event = new ContainerEvent(this, type, data);
+        ContainerListener[] list = new ContainerListener[0];
+        synchronized (listeners) {
+            list = listeners.toArray(list);
+        }
+        // 遍历所有监听器并触发事件
+        for (ContainerListener containerListener : list) {
+            containerListener.containerEvent(event);
+        }
+    }
+
+    public void addListenerDef(ContainerListenerDef listenererDef) {
+        synchronized (listenerDefs) {
+            listenerDefs.add(listenererDef);
+        }
+    }
+
+    public boolean listenerStart() {
+        System.out.println("Listener Start..........");
+        boolean ok = true;
+        synchronized (listeners) {
+            listeners.clear();
+            for (ContainerListenerDef def : listenerDefs) {
+                ContainerListener listener = null;
+                try {
+                    // 确定我们将要使用的类加载器
+                    String listenerClass = def.getListenerClass();
+                    ClassLoader classLoader = null;
+                    classLoader = this.getLoader();
+                    ClassLoader oldCtxClassLoader = Thread.currentThread().getContextClassLoader();
+                    // 创建这个过滤器的新实例并返回它
+                    Class<?> clazz = classLoader.loadClass(listenerClass);
+                    listener = (ContainerListener) clazz.getConstructor().newInstance();
+                    addContainerListener(listener);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    ok = false;
+                }
+            }
+        }
+        return (ok);
     }
 
     @Override

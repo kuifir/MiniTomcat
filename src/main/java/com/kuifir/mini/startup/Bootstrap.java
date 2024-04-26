@@ -2,6 +2,7 @@ package com.kuifir.mini.startup;
 
 import com.kuifir.mini.Logger;
 import com.kuifir.mini.connector.http.HttpConnector;
+import com.kuifir.mini.core.ContainerListenerDef;
 import com.kuifir.mini.core.FilterDef;
 import com.kuifir.mini.core.FilterMap;
 import com.kuifir.mini.core.StandardContext;
@@ -36,7 +37,12 @@ public class Bootstrap {
         filterMap.setURLPattern("/*");
         container.addFilterMap(filterMap);
         container.filterStart();
-
+        ContainerListenerDef listenerDef = new ContainerListenerDef();
+        listenerDef.setListenerName("TestListener");
+        listenerDef.setListenerClass("test.TestListener");
+        container.addListenerDef(listenerDef);
+        container.listenerStart();
+        container.start();
         connector.start();
     }
 
