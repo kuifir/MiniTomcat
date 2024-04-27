@@ -2,6 +2,7 @@ package com.kuifir.mini.core;
 
 import com.kuifir.mini.*;
 import com.kuifir.mini.connector.http.HttpConnector;
+import com.kuifir.mini.logger.FileLogger;
 import com.kuifir.mini.startup.Bootstrap;
 
 import javax.servlet.FilterConfig;
@@ -35,22 +36,34 @@ public class StandardContext extends ContainerBase implements Context {
     public StandardContext() {
         super();
         pipeline.setBasic(new StandardContextValve());
-        try {
-            // create a URLClassLoader
-            URL[] urls = new URL[1];
-            //这个URLClassloader的工作目录设置在HttpServer.WEB_ROOT
-            File classpath = new File(Bootstrap.WEB_ROOT);
-            urls[0] = Paths.get(classpath.getCanonicalPath() + File.separator).toUri().toURL();
-            loader = new URLClassLoader(urls);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
         log("Container created.");
     }
 
     public void start() {
         // 触发一个容器启动事件
         fireContainerEvent("Container Started", this);
+        // 添加日志组件
+        Logger logger = new FileLogger();
+        setLogger(logger);
+
+        // 添加过滤器
+        FilterDef filterDef = new FilterDef();
+        filterDef.setFilterName("TestFilter");
+        filterDef.setFilterClass("test.TestFilter");
+        addFilterDef(filterDef);
+
+        FilterMap filterMap = new FilterMap();
+        filterMap.setFilterName("TestFilter");
+        filterMap.setURLPattern("/*");
+        addFilterMap(filterMap);
+        filterStart();
+
+        // 添加监听器
+        ContainerListenerDef listenerDef = new ContainerListenerDef();
+        listenerDef.setListenerName("TestListener");
+        listenerDef.setListenerClass("test.TestListener");
+        addListenerDef(listenerDef);
+        listenerStart();
     }
 
     public void addContainerListener(ContainerListener listener) {
@@ -99,11 +112,11 @@ public class StandardContext extends ContainerBase implements Context {
                 try {
                     // 确定我们将要使用的类加载器
                     String listenerClass = def.getListenerClass();
-                    ClassLoader classLoader = null;
+                    WebappClassLoader classLoader = null;
                     classLoader = this.getLoader();
                     ClassLoader oldCtxClassLoader = Thread.currentThread().getContextClassLoader();
                     // 创建这个过滤器的新实例并返回它
-                    Class<?> clazz = classLoader.loadClass(listenerClass);
+                    Class<?> clazz = classLoader.getClassLoader().loadClass(listenerClass);
                     listener = (ContainerListener) clazz.getConstructor().newInstance();
                     addContainerListener(listener);
                 } catch (Throwable t) {
@@ -263,9 +276,6 @@ public class StandardContext extends ContainerBase implements Context {
         return urlPattern.startsWith("/");
     }
 
-    public void setLoader(URLClassLoader loader) {
-        this.loader = loader;
-    }
 
     public HttpConnector getConnector() {
         return connector;
@@ -287,12 +297,12 @@ public class StandardContext extends ContainerBase implements Context {
 
     @Override
     public String getDocBase() {
-        return null;
+        return this.docbase;
     }
 
     @Override
     public void setDocBase(String docBase) {
-
+        this.docbase =docBase;
     }
 
     @Override

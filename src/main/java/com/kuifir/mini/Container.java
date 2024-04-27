@@ -1,5 +1,7 @@
 package com.kuifir.mini;
 
+import com.kuifir.mini.core.WebappClassLoader;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,9 +13,9 @@ public interface Container {
 
     String getInfo();
 
-    ClassLoader getLoader();
+    WebappClassLoader getLoader();
 
-    void setLoader(ClassLoader loader);
+    void setLoader(WebappClassLoader loader);
 
     String getName();
 

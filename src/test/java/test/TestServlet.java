@@ -9,19 +9,26 @@ import java.io.IOException;
 import java.io.Serial;
 
 public class TestServlet extends HttpServlet {
+    static int count = 0;
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("Enter doGet()");
-        System.out.println("parameter name : " + request.getParameter("name"));
+        System.out.println("Another TestServlet Enter doGet()");
+        System.out.println("Another TestServlet  parameter name : " + request.getParameter("name"));
+        TestServlet.count++;
+        System.out.println("::::::::Another TestServlet call count ::::::::: " + TestServlet.count);
+        if (TestServlet.count > 2) {
+            response.addHeader("Connection", "close");
+        }
         HttpSession session = request.getSession(true);
         String user = (String) session.getAttribute("user");
         System.out.println("get user from session : " + user);
         if (user == null || user.isEmpty()) {
             session.setAttribute("user", "yale");
         }
+
         response.setCharacterEncoding("UTF-8");
         String doc = """
                 <!DOCTYPE html>\s
@@ -35,14 +42,8 @@ public class TestServlet extends HttpServlet {
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("Enter doPost()");
+        System.out.println("Enter doGet()");
         System.out.println("parameter name : " + request.getParameter("name"));
-        HttpSession session = request.getSession(true);
-        String user = (String) session.getAttribute("user");
-        System.out.println("get user from session : " + user);
-        if (user == null || user.isEmpty()) {
-            session.setAttribute("user", "yale");
-        }
         response.setCharacterEncoding("UTF-8");
         String doc = """
                 <!DOCTYPE html>\s

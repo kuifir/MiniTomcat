@@ -13,7 +13,7 @@ public abstract class ContainerBase implements Container, Pipeline {
     //子容器
     protected final Map<String, Container> children = new ConcurrentHashMap<>();
     //类加载器
-    protected ClassLoader loader = null;
+    protected WebappClassLoader loader = null;
     protected String name = null;
     //父容器
     protected Container parent = null;
@@ -22,7 +22,8 @@ public abstract class ContainerBase implements Container, Pipeline {
     protected Logger logger = null;
     //增加pipeline支持
     protected Pipeline pipeline = new StandardPipeline(this);
-
+    protected String path;
+    protected String docbase;
     @Override
     public void invoke(Request request, Response response) throws IOException, ServletException {
         System.out.println("ContainerBase invoke()");
@@ -79,7 +80,7 @@ public abstract class ContainerBase implements Container, Pipeline {
         return (className + "[" + getName() + "]");
     }
 
-    public ClassLoader getLoader() {
+    public WebappClassLoader getLoader() {
         if (loader != null)
             return (loader);
         if (parent != null)
@@ -87,11 +88,13 @@ public abstract class ContainerBase implements Container, Pipeline {
         return (null);
     }
 
-    public synchronized void setLoader(ClassLoader loader) {
-        ClassLoader oldLoader = this.loader;
-        if (oldLoader == loader) {
+    public synchronized void setLoader(WebappClassLoader loader) {
+        loader.setPath(path);
+        loader.setDocbase(docbase);
+        loader.setContainer(this);
+        WebappClassLoader oldLoader = this.loader;
+        if (oldLoader == loader)
             return;
-        }
         this.loader = loader;
     }
 

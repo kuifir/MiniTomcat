@@ -33,7 +33,7 @@ public class HttpRequestImpl implements HttpServletRequest,Request {
     String sessionid;
     StandardSessionFacade sessionFacade;
     private HttpResponseImpl response;
-
+    String docbase;
     public HttpRequestImpl() {
     }
 
@@ -196,6 +196,12 @@ public class HttpRequestImpl implements HttpServletRequest,Request {
                 sessionid = uri.substring(semicolon + tmp.length());
                 uri = uri.substring(0, semicolon);
             }
+        }
+        //get context from uri
+        int contextslash = uri.indexOf("/", 1);
+        if (contextslash != -1) {
+            this.docbase = uri.substring(1, contextslash);
+            uri = uri.substring(contextslash);
         }
     }
 
@@ -752,6 +758,14 @@ public class HttpRequestImpl implements HttpServletRequest,Request {
     public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws
             IllegalStateException {
         return null;
+    }
+
+    public String getDocbase() {
+        return docbase;
+    }
+
+    public void setDocbase(String docbase) {
+        this.docbase = docbase;
     }
 
     @Override
