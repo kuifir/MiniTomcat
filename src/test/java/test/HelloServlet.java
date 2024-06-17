@@ -11,7 +11,7 @@ public class HelloServlet implements Servlet {
                 <html>
                 <head><meta charset="utf-8"><title>Test</title></head>
                 <body bgcolor="#f0f0f0">
-                <h1 align="center">Hello World 你好</h1>
+                <h1 align="center">Hello World 你好 aaaa</h1>
                 """;
         res.getWriter().println(doc);
     }

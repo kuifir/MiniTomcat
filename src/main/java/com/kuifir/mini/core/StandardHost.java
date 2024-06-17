@@ -1,9 +1,6 @@
 package com.kuifir.mini.core;
 
-import com.kuifir.mini.ContainerEvent;
-import com.kuifir.mini.ContainerListener;
-import com.kuifir.mini.Request;
-import com.kuifir.mini.Response;
+import com.kuifir.mini.*;
 import com.kuifir.mini.connector.http.HttpConnector;
 
 import javax.servlet.ServletException;
@@ -53,7 +50,7 @@ public class StandardHost extends ContainerBase {
             context = new StandardContext();
             context.setDocBase(name);
             context.setConnector(connector);
-            WebappClassLoader loader = new WebappClassLoader();
+            Loader loader = new WebappLoader(name,this.loader.getClassLoader());
             context.setLoader(loader);
             loader.start();
             this.contextMap.put(name, context);
@@ -118,7 +115,7 @@ public class StandardHost extends ContainerBase {
                 try {
                     // Identify the class loader we will be using
                     String listenerClass = def.getListenerClass();
-                    WebappClassLoader classLoader = null;
+                    Loader classLoader = null;
                     //host对应的loader就是listener的loader
                     classLoader = this.getLoader();
                     ClassLoader oldCtxClassLoader =

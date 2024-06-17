@@ -1,9 +1,6 @@
 package com.kuifir.mini.core;
 
-import com.kuifir.mini.Container;
-import com.kuifir.mini.Request;
-import com.kuifir.mini.Response;
-import com.kuifir.mini.Wrapper;
+import com.kuifir.mini.*;
 import com.kuifir.mini.valves.AccessLogValve;
 
 import javax.servlet.Servlet;
@@ -55,7 +52,7 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
         if (actualClass == null) {
             throw new ServletException("servlet class has not been specified");
         }
-        WebappClassLoader classLoader = getLoader();
+        Loader classLoader = getLoader();
         Class<?> classClass = null;
         try {
             if (classLoader != null) {

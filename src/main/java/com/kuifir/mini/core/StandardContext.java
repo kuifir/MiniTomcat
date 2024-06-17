@@ -3,7 +3,6 @@ package com.kuifir.mini.core;
 import com.kuifir.mini.*;
 import com.kuifir.mini.connector.http.HttpConnector;
 import com.kuifir.mini.logger.FileLogger;
-import com.kuifir.mini.startup.Bootstrap;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -112,7 +111,7 @@ public class StandardContext extends ContainerBase implements Context {
                 try {
                     // 确定我们将要使用的类加载器
                     String listenerClass = def.getListenerClass();
-                    WebappClassLoader classLoader = null;
+                    Loader classLoader = null;
                     classLoader = this.getLoader();
                     ClassLoader oldCtxClassLoader = Thread.currentThread().getContextClassLoader();
                     // 创建这个过滤器的新实例并返回它
@@ -169,6 +168,7 @@ public class StandardContext extends ContainerBase implements Context {
         StandardWrapper servletWrapper = servletInstanceMap.get(name);
         if (servletWrapper == null) {
             String servletClassName = name;
+            System.out.println(servletClassName);
             servletWrapper = new StandardWrapper(servletClassName, this);
             this.servletClsMap.put(name, servletClassName);
             this.servletInstanceMap.put(name, servletWrapper);

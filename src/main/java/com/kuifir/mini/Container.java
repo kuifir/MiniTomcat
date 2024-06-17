@@ -13,9 +13,9 @@ public interface Container {
 
     String getInfo();
 
-    WebappClassLoader getLoader();
+    Loader getLoader();
 
-    void setLoader(WebappClassLoader loader);
+    void setLoader(Loader loader);
 
     String getName();
 

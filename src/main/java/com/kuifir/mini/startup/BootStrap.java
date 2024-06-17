@@ -1,5 +1,6 @@
 package com.kuifir.mini.startup;
 
+import com.kuifir.mini.Loader;
 import com.kuifir.mini.Logger;
 import com.kuifir.mini.connector.http.HttpConnector;
 import com.kuifir.mini.core.*;
@@ -7,19 +8,22 @@ import com.kuifir.mini.logger.FileLogger;
 
 import java.io.File;
 
-public class Bootstrap {
+public class BootStrap {
+    public static final String MINIT_HOME = System.getProperty("user.dir");
     public static final String WEB_ROOT = System.getProperty("user.dir") + File.separator + "webroot";
     private static int debug = 0;
+    public static final int PORT = 8080;
 
     public static void main(String[] args) {
         if (debug >= 1) {
             log(".... startup ....");
         }
+        System.setProperty("minit.home", MINIT_HOME);
         System.setProperty("minit.base", WEB_ROOT);
 
         HttpConnector connector = new HttpConnector();
         StandardHost container = new StandardHost();
-        WebappClassLoader loader = new WebappClassLoader();
+        Loader loader = new CommonLoader();
         container.setLoader(loader);
         loader.start();
         connector.setContainer(container);

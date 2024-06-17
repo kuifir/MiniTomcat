@@ -1,6 +1,6 @@
 package com.kuifir.mini.connector.http;
 
-import com.kuifir.mini.startup.Bootstrap;
+import com.kuifir.mini.startup.BootStrap;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +31,8 @@ public class StaticResourceProcessor {
         OutputStream output = null;
         try {
             output = response.getOutput();
-            File file = new File(Bootstrap.WEB_ROOT, request.getUri());
+            System.out.println(request.getUri());
+            File file = new File(BootStrap.WEB_ROOT, request.getUri());
             if (file.exists()) {
                 // 拼响应头
                 response.setCharacterEncoding(StandardCharsets.UTF_8.name());

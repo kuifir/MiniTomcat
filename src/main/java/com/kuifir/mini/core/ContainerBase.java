@@ -3,8 +3,6 @@ package com.kuifir.mini.core;
 import com.kuifir.mini.*;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +11,7 @@ public abstract class ContainerBase implements Container, Pipeline {
     //子容器
     protected final Map<String, Container> children = new ConcurrentHashMap<>();
     //类加载器
-    protected WebappClassLoader loader = null;
+    protected Loader loader = null;
     protected String name = null;
     //父容器
     protected Container parent = null;
@@ -80,7 +78,7 @@ public abstract class ContainerBase implements Container, Pipeline {
         return (className + "[" + getName() + "]");
     }
 
-    public WebappClassLoader getLoader() {
+    public Loader getLoader() {
         if (loader != null)
             return (loader);
         if (parent != null)
@@ -88,11 +86,11 @@ public abstract class ContainerBase implements Container, Pipeline {
         return (null);
     }
 
-    public synchronized void setLoader(WebappClassLoader loader) {
+    public synchronized void setLoader(Loader loader) {
         loader.setPath(path);
         loader.setDocbase(docbase);
         loader.setContainer(this);
-        WebappClassLoader oldLoader = this.loader;
+        Loader oldLoader = this.loader;
         if (oldLoader == loader)
             return;
         this.loader = loader;

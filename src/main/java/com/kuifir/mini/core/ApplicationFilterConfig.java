@@ -1,6 +1,7 @@
 package com.kuifir.mini.core;
 
 import com.kuifir.mini.Context;
+import com.kuifir.mini.Loader;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -31,7 +32,7 @@ public class ApplicationFilterConfig implements FilterConfig {
         }
         // 确定我们将使用的类加载器
         String filterClass = filterDef.getFilterClass();
-        WebappClassLoader classLoader = null;
+        Loader classLoader = null;
         classLoader = context.getLoader();
         ClassLoader oldCtxClassLoader = Thread.currentThread().getContextClassLoader();
         // 实例化这个过滤器的新实例并返回
