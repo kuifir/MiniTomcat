@@ -1,23 +1,47 @@
 package com.kuifir.mini.startup;
 
 import com.kuifir.mini.Loader;
-import com.kuifir.mini.Logger;
 import com.kuifir.mini.connector.http.HttpConnector;
 import com.kuifir.mini.core.*;
-import com.kuifir.mini.logger.FileLogger;
+import com.kuifir.mini.loader.CommonLoader;
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 import java.io.File;
 
 public class BootStrap {
     public static final String MINIT_HOME = System.getProperty("user.dir");
-    public static final String WEB_ROOT = System.getProperty("user.dir") + File.separator + "webroot";
+    public static String WEB_ROOT = System.getProperty("user.dir");
     private static int debug = 0;
-    public static final int PORT = 8080;
+    public static int PORT = 8080;
+    public static String HOST="localhost";
 
     public static void main(String[] args) {
         if (debug >= 1) {
             log(".... startup ....");
         }
+        // scan server.xml
+        // scan web.xml
+        String file = MINIT_HOME + File.separator + "conf" + File.separator + "server.xml";
+        SAXReader reader = new SAXReader();
+        Document document;
+        try {
+            document = reader.read(file);
+            Element root = document.getRootElement();
+            Element connectorelement = root.element("Connector");
+            Attribute portattribute = connectorelement.attribute("port");
+            PORT = Integer.parseInt(portattribute.getText());
+            Element hostelement = root.element("Host");
+            Attribute appbaseattribute = hostelement.attribute("appBase");
+            WEB_ROOT = WEB_ROOT + File.separator + appbaseattribute.getText();
+            HOST = hostelement.attribute("name").getText();
+        } catch (Exception e) {
+            log(e.getMessage());
+        }
+        log(MINIT_HOME);
+        log(WEB_ROOT);
         System.setProperty("minit.home", MINIT_HOME);
         System.setProperty("minit.base", WEB_ROOT);
 

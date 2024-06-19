@@ -3,6 +3,11 @@ package com.kuifir.mini.core;
 import com.kuifir.mini.*;
 import com.kuifir.mini.connector.http.HttpConnector;
 import com.kuifir.mini.logger.FileLogger;
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -14,6 +19,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,25 +50,110 @@ public class StandardContext extends ContainerBase implements Context {
         // 添加日志组件
         Logger logger = new FileLogger();
         setLogger(logger);
+        //scan web.xml
+        String file = System.getProperty("minit.base") + File.separator +
+                this.docbase + File.separator + "WEB-INF" + File.separator + "web.xml";
+        SAXReader reader = new SAXReader();
+        Document document;
+        try {
+            document = reader.read(file);
+            Element root = document.getRootElement();
 
-        // 添加过滤器
-        FilterDef filterDef = new FilterDef();
-        filterDef.setFilterName("TestFilter");
-        filterDef.setFilterClass("test.TestFilter");
-        addFilterDef(filterDef);
+            //listeners
+            List<Element> listeners = root.elements("listener");
+            for (Element listener : listeners) {
+                Element listenerclass = listener.element("listener-class");
+                String listenerclassname = listenerclass.getText();
+                System.out.println("listenerclassname: " + listenerclassname);
 
-        FilterMap filterMap = new FilterMap();
-        filterMap.setFilterName("TestFilter");
-        filterMap.setURLPattern("/*");
-        addFilterMap(filterMap);
-        filterStart();
+                //load listeners
+                ContainerListenerDef listenerDef = new ContainerListenerDef();
+                listenerDef.setListenerName(listenerclassname);
+                listenerDef.setListenerClass(listenerclassname);
+                addListenerDef(listenerDef);
+            }
+            listenerStart();
 
-        // 添加监听器
-        ContainerListenerDef listenerDef = new ContainerListenerDef();
-        listenerDef.setListenerName("TestListener");
-        listenerDef.setListenerClass("test.TestListener");
-        addListenerDef(listenerDef);
-        listenerStart();
+            //filters
+            List<Element> filters = root.elements("filter");
+            for (Element filter : filters) {
+                Element filetername = filter.element("filter-name");
+                String fileternamestr = filetername.getText();
+                Element fileterclass = filter.element("filter-class");
+                String fileterclassstr = fileterclass.getText();
+                System.out.println("filter " + fileternamestr + fileterclassstr);
+
+                //load filters
+                FilterDef filterDef = new FilterDef();
+                filterDef.setFilterName(fileternamestr);
+                filterDef.setFilterClass(fileterclassstr);
+                addFilterDef(filterDef);
+            }
+
+            //filter mappings
+            List<Element> filtermaps = root.elements("filter-mapping");
+            for (Element filtermap : filtermaps) {
+                Element filetername = filtermap.element("filter-name");
+                String fileternamestr = filetername.getText();
+                Element urlpattern = filtermap.element("url-pattern");
+                String urlpatternstr = urlpattern.getText();
+                System.out.println("filter mapping " + fileternamestr + urlpatternstr);
+
+                FilterMap filterMap = new FilterMap();
+                filterMap.setFilterName(fileternamestr);
+                filterMap.setURLPattern(urlpatternstr);
+                addFilterMap(filterMap);
+            }
+
+            filterStart();
+
+            //servlet
+            List<Element> servlets = root.elements("servlet");
+            for (Element servlet : servlets) {
+                Element servletname = servlet.element("servlet-name");
+                String servletnamestr = servletname.getText();
+                Element servletclass = servlet.element("servlet-class");
+                String servletclassstr = servletclass.getText();
+                Element loadonstartup = servlet.element("load-on-startup");
+                String loadonstartupstr = null;
+                if (loadonstartup != null) {
+                    loadonstartupstr = loadonstartup.getText();
+                }
+
+                System.out.println("servlet " + servletnamestr + servletclassstr);
+
+                this.servletClsMap.put(servletnamestr, servletclassstr);
+                if (loadonstartupstr != null) {
+                    getWrapper(servletnamestr);
+                }
+
+            }
+
+        } catch (DocumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        System.out.println("Context started.........");
+
+//        // 添加过滤器
+//        FilterDef filterDef = new FilterDef();
+//        filterDef.setFilterName("TestFilter");
+//        filterDef.setFilterClass("test.TestFilter");
+//        addFilterDef(filterDef);
+//
+//        FilterMap filterMap = new FilterMap();
+//        filterMap.setFilterName("TestFilter");
+//        filterMap.setURLPattern("/*");
+//        addFilterMap(filterMap);
+//        filterStart();
+//
+//        // 添加监听器
+//        ContainerListenerDef listenerDef = new ContainerListenerDef();
+//        listenerDef.setListenerName("TestListener");
+//        listenerDef.setListenerClass("test.TestListener");
+//        addListenerDef(listenerDef);
+//        listenerStart();
     }
 
     public void addContainerListener(ContainerListener listener) {
@@ -167,7 +258,10 @@ public class StandardContext extends ContainerBase implements Context {
     public Wrapper getWrapper(String name) {
         StandardWrapper servletWrapper = servletInstanceMap.get(name);
         if (servletWrapper == null) {
-            String servletClassName = name;
+            String servletClassName = servletClsMap.get(name);
+            if(StringUtils.isEmpty(servletClassName)){
+                servletClassName = name;
+            }
             System.out.println(servletClassName);
             servletWrapper = new StandardWrapper(servletClassName, this);
             this.servletClsMap.put(name, servletClassName);

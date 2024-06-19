@@ -1,10 +1,6 @@
 package com.kuifir.mini;
 
-import com.kuifir.mini.core.WebappClassLoader;
-
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface Container {

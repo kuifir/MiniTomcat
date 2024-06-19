@@ -1,4 +1,4 @@
-package com.kuifir.mini.core;
+package com.kuifir.mini.loader;
 
 import com.kuifir.mini.Container;
 import com.kuifir.mini.Loader;

@@ -63,7 +63,7 @@ public class HttpConnector implements Connector, Runnable {
     public void run() {
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(BootStrap.PORT, 1, InetAddress.getByName("127.0.0.1"));
+            serverSocket = new ServerSocket(BootStrap.PORT, 1, InetAddress.getByName(BootStrap.HOST));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

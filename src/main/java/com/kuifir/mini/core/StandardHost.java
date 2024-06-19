@@ -2,12 +2,16 @@ package com.kuifir.mini.core;
 
 import com.kuifir.mini.*;
 import com.kuifir.mini.connector.http.HttpConnector;
+import com.kuifir.mini.loader.WebappLoader;
+import com.kuifir.mini.logger.FileLogger;
 
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StandardHost extends ContainerBase {
@@ -46,13 +50,15 @@ public class StandardHost extends ContainerBase {
     public StandardContext getContext(String name) {
         StandardContext context = contextMap.get(name);
         if (context == null) {
+            System.out.println("loading context : " + name);
             //创建新的context，有自己独立的根目录和类加载器
             context = new StandardContext();
             context.setDocBase(name);
             context.setConnector(connector);
-            Loader loader = new WebappLoader(name,this.loader.getClassLoader());
+            Loader loader = new WebappLoader(name, this.loader.getClassLoader());
             context.setLoader(loader);
             loader.start();
+            context.start();
             this.contextMap.put(name, context);
         }
         return context;
@@ -63,12 +69,27 @@ public class StandardHost extends ContainerBase {
     public void start() {
         fireContainerEvent("Host Started", this);
 
-        // 添加监听器
-        ContainerListenerDef listenerDef = new ContainerListenerDef();
-        listenerDef.setListenerName("TestListener");
-        listenerDef.setListenerClass("test.TestListener");
-        addListenerDef(listenerDef);
-        listenerStart();
+        Logger logger = new FileLogger();
+        setLogger(logger);
+
+//        ContainerListenerDef listenerDef = new ContainerListenerDef();
+//        listenerDef.setListenerName("TestListener");
+//        listenerDef.setListenerClass("test.TestListener");
+//        addListenerDef(listenerDef);
+//        listenerStart();
+
+        // load all context under /webapps directory
+        // 在/webapps目录下加载所有上下文
+        File classPath = new File(System.getProperty("minit.base"));
+        File[] dirs = classPath.listFiles();
+        if (Objects.nonNull(dirs)) {
+            for (File dir : dirs) {
+                if(dir.isDirectory()){
+                    getContext(dir.getName());
+                }
+            }
+        }
+
     }
 
     public void addContainerListener(ContainerListener listener) {
