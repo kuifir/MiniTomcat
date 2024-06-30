@@ -9,14 +9,9 @@ import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import javax.servlet.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,11 +31,15 @@ public class StandardContext extends ContainerBase implements Context {
     private FilterMap[] filterMaps = new FilterMap[0];
 
     private ArrayList<ContainerListenerDef> listenerDefs = new ArrayList<>();
-    private ArrayList<ContainerListener> listeners = new ArrayList<>();
+    private ArrayList<ServletContextListener> listeners = new ArrayList<>();
 
+    private Map<String, String> initParametersMap = new ConcurrentHashMap<>();
+    private ServletContext servletContext;
+    private Map<String, Map<String, String>> servletInitParametersMap = new ConcurrentHashMap<>();
+    private Map<String, String> servletMappingMap = new ConcurrentHashMap<>();
     public StandardContext() {
         super();
-        pipeline.setBasic(new StandardContextValve());
+        pipeline.setBasic(new StandardContextValve(this));
         log("Container created.");
     }
 
@@ -59,6 +58,16 @@ public class StandardContext extends ContainerBase implements Context {
             document = reader.read(file);
             Element root = document.getRootElement();
 
+            List<Element> contextParams = root.elements("context-param");
+
+            for (Element contextParam : contextParams) {
+                Element paramNameElement = contextParam.element("param-name");
+                String paramName = paramNameElement.getText();
+                Element paramValueElement = contextParam.element("param-value");
+                String fileternamestr = paramValueElement.getText();
+                this.initParametersMap.put(paramName, fileternamestr);
+            }
+            this.servletContext = new StandardServletContext(this.docbase, this.initParametersMap);
             //listeners
             List<Element> listeners = root.elements("listener");
             for (Element listener : listeners) {
@@ -114,6 +123,16 @@ public class StandardContext extends ContainerBase implements Context {
                 String servletnamestr = servletname.getText();
                 Element servletclass = servlet.element("servlet-class");
                 String servletclassstr = servletclass.getText();
+
+                Element servletInitParamElement = servlet.element("init-param");
+                Element servletInitParamNameElement = servletInitParamElement.element("param-name");
+                String servletInitParamName = servletInitParamNameElement.getText();
+                Element servletInitParamValueElement = servletInitParamElement.element("param-value");
+                String servletInitParamValue = servletInitParamValueElement.getText();
+                Map<String, String> servletInitParamMap = new ConcurrentHashMap();
+                servletInitParamMap.put(servletInitParamName, servletInitParamValue);
+                this.servletInitParametersMap.put(servletclassstr, servletInitParamMap);
+
                 Element loadonstartup = servlet.element("load-on-startup");
                 String loadonstartupstr = null;
                 if (loadonstartup != null) {
@@ -126,9 +145,16 @@ public class StandardContext extends ContainerBase implements Context {
                 if (loadonstartupstr != null) {
                     getWrapper(servletnamestr);
                 }
-
             }
+            List<Element> servletMappings = root.elements("servlet-mapping");
 
+            for (Element servletMapping : servletMappings) {
+                Element servletname = servletMapping.element("servlet-name");
+                String servletnamestr = servletname.getText();
+                Element servletclass = servletMapping.element("url-pattern");
+                String urlPatternStr = servletclass.getText();
+                this.servletMappingMap.put(urlPatternStr, servletnamestr);
+            }
         } catch (DocumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -156,7 +182,7 @@ public class StandardContext extends ContainerBase implements Context {
 //        listenerStart();
     }
 
-    public void addContainerListener(ContainerListener listener) {
+    public void addContainerListener(ServletContextListener listener) {
         // 添加一个新的容器监听器到监听器列表，并确保线程安全
         synchronized (listeners) {
             listeners.add(listener);
@@ -193,12 +219,13 @@ public class StandardContext extends ContainerBase implements Context {
     }
 
     public boolean listenerStart() {
+        ServletContextEvent servletContextEvent = new ServletContextEvent(this.servletContext);
         System.out.println("Listener Start..........");
         boolean ok = true;
         synchronized (listeners) {
             listeners.clear();
             for (ContainerListenerDef def : listenerDefs) {
-                ContainerListener listener = null;
+                ServletContextListener listener = null;
                 try {
                     // 确定我们将要使用的类加载器
                     String listenerClass = def.getListenerClass();
@@ -207,8 +234,9 @@ public class StandardContext extends ContainerBase implements Context {
                     ClassLoader oldCtxClassLoader = Thread.currentThread().getContextClassLoader();
                     // 创建这个过滤器的新实例并返回它
                     Class<?> clazz = classLoader.getClassLoader().loadClass(listenerClass);
-                    listener = (ContainerListener) clazz.getConstructor().newInstance();
+                    listener = (ServletContextListener) clazz.getConstructor().newInstance();
                     addContainerListener(listener);
+                    listener.contextInitialized(servletContextEvent);
                 } catch (Throwable t) {
                     t.printStackTrace();
                     ok = false;
@@ -411,7 +439,7 @@ public class StandardContext extends ContainerBase implements Context {
 
     @Override
     public ServletContext getServletContext() {
-        return null;
+        return servletContext;
     }
 
     @Override
@@ -452,5 +480,21 @@ public class StandardContext extends ContainerBase implements Context {
     @Override
     public void reload() {
 
+    }
+
+    public Map<String, Map<String, String>> getServletInitParametersMap() {
+        return servletInitParametersMap;
+    }
+
+    public void setServletInitParametersMap(Map<String, Map<String, String>> servletInitParametersMap) {
+        this.servletInitParametersMap = servletInitParametersMap;
+    }
+
+    public Map<String, String> getServletMappingMap() {
+        return servletMappingMap;
+    }
+
+    public void setServletMappingMap(Map<String, String> servletMappingMap) {
+        this.servletMappingMap = servletMappingMap;
     }
 }

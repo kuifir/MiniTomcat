@@ -496,7 +496,7 @@ public class HttpRequestImpl implements HttpServletRequest,Request {
 
     @Override
     public String getServletPath() {
-        return null;
+        return this.uri;
     }
 
     @Override

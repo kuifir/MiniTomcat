@@ -15,12 +15,14 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
     private Servlet instance = null;
     private String servletClass;
 
+    private StandardContext standardContext;
     public StandardWrapper(String servletClass, StandardContext parent) {
         super();
         pipeline.setBasic(new StandardWrapperValve());
         pipeline.addValve(new AccessLogValve());
         //以ServletContext为parent
         this.parent = parent;
+        this.standardContext = parent;
         this.servletClass = servletClass;
         try {
             loadServlet();
@@ -67,8 +69,12 @@ public class StandardWrapper extends ContainerBase implements Wrapper {
             throw new ServletException("Failed to instantiate servlet");
         }
         try {
-            servlet.init(null);
+            System.out.println("servletClass=============" + this.servletClass);
+            System.out.println("servletContext=============" + this.standardContext.getServletContext());
+            System.out.println("ServletInitParametersMap=============" + this.standardContext.getServletInitParametersMap());
+            servlet.init(new StandardServletConfig(servletClass, standardContext.getServletContext(), standardContext.getServletInitParametersMap().get(servletClass)));
         } catch (Throwable f) {
+            f.printStackTrace();
             throw new ServletException("Failed initialize servlet.");
         }
         instance = servlet;
