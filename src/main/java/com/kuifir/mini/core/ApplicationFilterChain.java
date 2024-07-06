@@ -61,6 +61,7 @@ public class ApplicationFilterChain implements FilterChain {
         } catch (IOException | ServletException | RuntimeException e) {
             throw new RuntimeException(e);
         } catch (Throwable e) {
+            e.printStackTrace();
             throw new ServletException("filterChain.servlet", e);
         }
 

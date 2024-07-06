@@ -239,8 +239,10 @@ public class HttpResponseImpl implements HttpServletResponse,Response {
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        writer = new PrintWriter(new OutputStreamWriter(output, getCharacterEncoding()), true);
-        return writer;
+       	if (writer == null) {
+			writer = new PrintWriter(new OutputStreamWriter(output,getCharacterEncoding()), true);
+		}
+	    return writer;
     }
 
     @Override

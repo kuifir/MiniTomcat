@@ -5,17 +5,17 @@ import com.kuifir.mini.session.StandardSessionFacade;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpRequestImpl implements HttpServletRequest,Request {
+public class HttpRequestImpl implements HttpServletRequest, Request {
     private InputStream input;
     private SocketInputStream sis;
     private String uri;
@@ -34,6 +34,7 @@ public class HttpRequestImpl implements HttpServletRequest,Request {
     StandardSessionFacade sessionFacade;
     private HttpResponseImpl response;
     String docbase;
+
     public HttpRequestImpl() {
     }
 
@@ -714,9 +715,49 @@ public class HttpRequestImpl implements HttpServletRequest,Request {
         return false;
     }
 
+    private static final int BUFFER_SIZE = 1024;
+    //下面的字符串是当文件没有找到时返回的404错误描述
+    private static String fileNotFoundMessage = """
+            <h1>File Not Found</h1>
+            """;
+
     @Override
     public RequestDispatcher getRequestDispatcher(String path) {
-        return null;
+        return new RequestDispatcher() {
+            @Override
+            public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+                byte[] bytes = new byte[BUFFER_SIZE];
+                FileInputStream fis = null;
+                PrintWriter output = null;
+                String file = System.getProperty("minit.base") + File.separator +
+                        docbase + File.separator + path;
+                File resource = new File(file);
+                try {
+                    output = response.getWriter();
+                    if (resource.exists()) {
+                        // 拼响应头
+                        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                        //读取文件内容，写入输出流
+                        Files.readAllLines(Path.of(resource.getPath())).forEach(output::print);
+                        output.flush();
+                    } else {
+                        output.print(fileNotFoundMessage);
+                    }
+                } catch (Exception e) {
+                    System.out.printf(e.getMessage());
+                } finally {
+                    if (fis != null) {
+                        fis.close();
+                    }
+                }
+
+            }
+
+            @Override
+            public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException {
+
+            }
+        };
     }
 
     @Override
